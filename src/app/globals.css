@@ -1,0 +1,706 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+/* ========================================
+   DRIPNGRID - Premium Fashion Theme
+   Strict Black & White Color Palette
+   ======================================== */
+
+/* Theme Variables - Light Mode Only */
+:root {
+  /* Core Colors - Strict Black & White */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8f8f8;
+  --color-bg-tertiary: #f0f0f0;
+  --color-text: #000000;
+  --color-text-secondary: #333333;
+  --color-text-muted: #666666;
+  --color-border: #e0e0e0;
+  --color-border-subtle: #f0f0f0;
+
+  /* Inverted (for buttons, overlays) */
+  --color-inverted-bg: #000000;
+  --color-inverted-text: #ffffff;
+
+  /* Scrollbar */
+  --scrollbar-track: #f0f0f0;
+  --scrollbar-thumb: #cccccc;
+  --scrollbar-thumb-hover: #999999;
+
+  /* Selection */
+  --selection-bg: #000000;
+  --selection-text: #ffffff;
+}
+
+/* Static Variables (theme-independent) */
+:root {
+  /* Typography */
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Spacing */
+  --section-padding: clamp(4rem, 10vw, 8rem);
+  --container-padding: clamp(1.5rem, 5vw, 4rem);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slower: 800ms cubic-bezier(0.19, 1, 0.22, 1);
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 500;
+  --z-overlay: 900;
+  --z-modal: 1000;
+  --z-toast: 1100;
+  --foreground: 0 0% 100%;
+}
+
+@layer utilities {
+  .animate-draw {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: draw 1s ease-out forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background-color var(--transition-base), color var(--transition-base);
+  }
+
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-text);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  /* Links */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ========================================
+   Component Styles
+   ======================================== */
+
+@layer components {
+
+  /* Container */
+  .container-custom {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
+
+  .container-wide {
+    width: 100%;
+    max-width: 1920px;
+    margin: 0 auto;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
+
+  /* Section spacing */
+  .section-padding {
+    padding-top: var(--section-padding);
+    padding-bottom: var(--section-padding);
+  }
+
+  /* ========================================
+     Typography - Refined & Elegant
+     ======================================== */
+
+  .text-display-xl {
+    font-size: clamp(3rem, 10vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: 0.1em;
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  .text-display-lg {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: 0.08em;
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  .text-display-md {
+    font-size: clamp(1.75rem, 5vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: 0.05em;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  .text-display-sm {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    line-height: 1.1;
+    letter-spacing: 0.05em;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  .text-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--color-text-muted);
+  }
+
+  /* Brand Logo Typography */
+  .brand-logo {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    letter-spacing: 0.2em;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  /* Giant Brand Name (END SECTION) */
+  .brand-giant {
+    font-size: clamp(3rem, 12vw, 10rem);
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* ========================================
+     Buttons - Black & White Only
+     ======================================== */
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    background-color: var(--color-inverted-bg);
+    color: var(--color-inverted-text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--color-inverted-bg);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-base);
+  }
+
+  .btn-primary:hover {
+    background-color: transparent;
+    color: var(--color-text);
+    border-color: var(--color-text);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    background-color: transparent;
+    color: var(--color-text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-inverted-bg);
+    color: var(--color-inverted-text);
+    border-color: var(--color-inverted-bg);
+  }
+
+  /* Small Button Variant */
+  .btn-sm {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.625rem;
+  }
+
+  /* ========================================
+     Cards & Surfaces
+     ======================================== */
+
+  .surface-primary {
+    background-color: var(--color-bg);
+  }
+
+  .surface-secondary {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .surface-tertiary {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .surface-inverted {
+    background-color: var(--color-inverted-bg);
+    color: var(--color-inverted-text);
+  }
+
+  /* ========================================
+     Lines & Dividers
+     ======================================== */
+
+  .line-horizontal {
+    width: 100%;
+    height: 1px;
+    background-color: var(--color-border);
+  }
+
+  .line-vertical {
+    width: 1px;
+    height: 100%;
+    background-color: var(--color-border);
+  }
+
+  /* ========================================
+     Image Effects
+     ======================================== */
+
+  .image-hover {
+    overflow: hidden;
+  }
+
+  .image-hover img {
+    transition: transform var(--transition-slower);
+  }
+
+  .image-hover:hover img {
+    transform: scale(1.03);
+  }
+
+  /* ========================================
+     Marquee - Seamless Infinite Loop
+     ======================================== */
+
+  .marquee-container {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee-track {
+    display: inline-flex;
+    animation: marquee 10s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  .marquee-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 3rem;
+    padding-right: 3rem;
+  }
+
+  /* ========================================
+     Link Animations
+     ======================================== */
+
+  .link-underline {
+    position: relative;
+  }
+
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: currentColor;
+    transition: width var(--transition-base);
+  }
+
+  .link-underline:hover::after {
+    width: 100%;
+  }
+
+  /* ========================================
+     Product Card Specific
+     ======================================== */
+
+  .product-image-container {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background-color: var(--color-bg-secondary);
+  }
+
+  .product-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity var(--transition-base);
+  }
+
+  /* Badge Styles - Black/White Only */
+  .badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .badge-new {
+    background-color: var(--color-inverted-bg);
+    color: var(--color-inverted-text);
+  }
+
+  .badge-sale {
+    background-color: var(--color-inverted-bg);
+    color: var(--color-inverted-text);
+  }
+
+  .badge-sold-out {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+  }
+
+  /* ========================================
+     Form Elements
+     ======================================== */
+
+  .input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    transition: border-color var(--transition-base);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--color-text);
+  }
+
+  .input::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  /* ========================================
+     Dropdown/Select
+     ======================================== */
+
+  .dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .dropdown:hover {
+    border-color: var(--color-text);
+  }
+
+  /* ========================================
+     Back to Top Button
+     ======================================== */
+
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    z-index: var(--z-dropdown);
+  }
+
+  .back-to-top:hover {
+    background-color: var(--color-inverted-bg);
+    color: var(--color-inverted-text);
+    border-color: var(--color-inverted-bg);
+  }
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+
+@layer utilities {
+
+  /* Hide scrollbar */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Aspect ratios */
+  .aspect-product {
+    aspect-ratio: 3 / 4;
+  }
+
+  .aspect-editorial {
+    aspect-ratio: 4 / 5;
+  }
+
+  .aspect-hero {
+    aspect-ratio: 16 / 9;
+  }
+
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+
+  /* Transition timing */
+  .ease-out-expo {
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  /* Text Colors */
+  .text-primary {
+    color: var(--color-text);
+  }
+
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  /* Background Colors */
+  .bg-primary {
+    background-color: var(--color-bg);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .bg-inverted {
+    background-color: var(--color-inverted-bg);
+  }
+
+  /* Border Colors */
+  .border-subtle {
+    border-color: var(--color-border-subtle);
+  }
+
+  .border-default {
+    border-color: var(--color-border);
+  }
+}
+
+/* ========================================
+   Animations & Keyframes
+   ======================================== */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Promo Ribbon Marquee */
+.promo-ribbon-track {
+  animation: marquee 10s linear infinite;
+  will-change: transform;
+}
+
+.promo-ribbon:hover .promo-ribbon-track {
+  animation-play-state: paused;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.page-transition {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* ========================================
+   Order Tracking Timeline Animations
+   ======================================== */
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.4s ease-out forwards;
+}
+
+/* ========================================
+   Media Queries
+   ======================================== */
+
+@media (max-width: 768px) {
+  .text-display-xl {
+    letter-spacing: 0.05em;
+  }
+
+  .brand-giant {
+    letter-spacing: 0.1em;
+  }
+}

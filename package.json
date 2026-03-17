@@ -1,0 +1,43 @@
+{
+  "name": "dripngrid",
+  "version": "1.0.1",
+  "description": "Premium streetwear brand website",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@sanity/client": "^7.14.1",
+    "@sanity/image-url": "^2.0.3",
+    "@sanity/vision": "^5.6.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "bcryptjs": "^3.0.3",
+    "canvas-confetti": "^1.9.4",
+    "dotenv": "^17.2.3",
+    "gsap": "^3.14.2",
+    "next": "^16.1.4",
+    "next-auth": "^5.0.0-beta.30",
+    "next-auth-sanity": "^1.5.3",
+    "next-sanity": "^12.0.14",
+    "razorpay": "^2.9.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "resend": "^6.8.0",
+    "sanity": "^5.6.0",
+    "styled-components": "^6.3.8",
+    "zustand": "^5.0.10"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
+  }
+}
