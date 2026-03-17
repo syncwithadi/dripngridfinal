@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fontlibrary.org//face/lil-grotesk');
 
 @import "tailwindcss";
 
@@ -38,6 +39,7 @@
   /* Typography */
   --font-display: 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
+  --font-grotesk: 'LilGroteskRegular', 'Inter', system-ui, sans-serif;
 
   /* Spacing */
   --section-padding: clamp(4rem, 10vw, 8rem);
@@ -268,6 +270,7 @@
     text-transform: uppercase;
     text-decoration: none;
     border: 1px solid var(--color-inverted-bg);
+    border-radius: 0.75rem;
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -294,6 +297,7 @@
     text-transform: uppercase;
     text-decoration: none;
     border: 1px solid var(--color-text);
+    border-radius: 0.75rem;
     cursor: pointer;
     transition: all var(--transition-base);
   }

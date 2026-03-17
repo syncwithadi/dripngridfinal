@@ -69,7 +69,7 @@ function OrderConfirmationContent() {
     <div className="min-h-[100dvh] bg-[var(--color-bg)] flex items-center justify-center p-2 sm:p-4">
       <div className="w-full max-w-[400px] animate-fade-in-up">
         {/* Premium Card */}
-        <div className="bg-[var(--color-bg)] border border-[var(--color-border)] shadow-lg overflow-hidden">
+        <div className="bg-[var(--color-bg)] border border-[var(--color-border)] shadow-xl overflow-hidden rounded-2xl">
 
           {/* Compact Header */}
           <div className="bg-[var(--color-text)] text-[var(--color-bg)] p-5 text-center relative overflow-hidden">
@@ -80,8 +80,15 @@ function OrderConfirmationContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
               </div>
-              <h1 className="text-xl md:text-2xl font-luxury tracking-tight mb-1 uppercase">Order Confirmed</h1>
-              <p className="text-xs md:text-sm opacity-80 tracking-wide font-body">Your order has been received</p>
+              <h1
+                className="text-xl md:text-2xl tracking-tight mb-1 uppercase"
+                style={{ fontFamily: 'var(--font-grotesk)' }}
+              >
+                Order Confirmed
+              </h1>
+              <p className="text-xs md:text-sm opacity-80 tracking-wide" style={{ fontFamily: 'var(--font-grotesk)' }}>
+                Your order has been received
+              </p>
             </div>
           </div>
 
@@ -94,10 +101,10 @@ function OrderConfirmationContent() {
             ) : order ? (
               <div className="space-y-4">
                 {/* Order Info Grid */}
-                <div className="grid grid-cols-2 gap-4 pb-4 border-b border-[var(--color-border)]">
+                <div className="grid grid-cols-2 gap-4 pb-4 border-b border-[var(--color-border)]" style={{ fontFamily: 'var(--font-grotesk)' }}>
                   <div>
                     <p className="text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] mb-1">Order No.</p>
-                    <p className="text-sm font-medium text-[var(--color-text)] font-mono">#{orderNumber}</p>
+                    <p className="text-sm font-medium text-[var(--color-text)]">#{orderNumber}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] mb-1">Date</p>
@@ -131,18 +138,18 @@ function OrderConfirmationContent() {
                 </div>
 
                 {/* Total */}
-                <div className="flex justify-between items-end pt-2">
+                <div className="flex justify-between items-end pt-2" style={{ fontFamily: 'var(--font-grotesk)' }}>
                   <span className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Total Amount</span>
-                  <span className="text-lg font-serif text-[var(--color-text)]">{formatPrice(order.total)}</span>
+                  <span className="text-lg text-[var(--color-text)]">{formatPrice(order.total)}</span>
                 </div>
 
                 {/* Email Confirmation */}
-                <p className="text-[11px] text-center text-[var(--color-text-muted)] bg-[var(--color-bg-secondary)] py-2 px-3 rounded">
+                <p className="text-[11px] text-center text-[var(--color-text-muted)] bg-[var(--color-bg-secondary)] py-2 px-3 rounded-lg" style={{ fontFamily: 'var(--font-grotesk)' }}>
                   Updates sent to <span className="text-[var(--color-text)]">{order?.customer?.email}</span>
                 </p>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-1">
+                <div className="flex gap-3 pt-1" style={{ fontFamily: 'var(--font-grotesk)' }}>
                   <Link
                     href={`/track-order?order=${orderNumber}`}
                     className="flex-1 btn-primary justify-center py-2.5 text-xs uppercase tracking-widest"
