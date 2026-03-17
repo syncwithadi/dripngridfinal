@@ -49,6 +49,9 @@ interface BannerData {
   bannerButton1Link?: string | null;
   bannerButton2Text?: string | null;
   bannerButton2Link?: string | null;
+  showcaseImage?: string | null;
+  showcaseButtonText?: string | null;
+  showcaseButtonLink?: string | null;
 }
 
 interface HomeContentProps {
@@ -104,8 +107,12 @@ export default function HomeContent({
       {/* Best Sellers */}
       <BestSellers products={bestSellers} onQuickView={handleQuickView} />
 
-      {/* Visual Showcase (Replaces Philosophy) */}
-      <VisualShowcase />
+      {/* Visual Showcase — image + button controlled from Sanity Studio */}
+      <VisualShowcase
+        showcaseImage={banner?.showcaseImage}
+        showcaseButtonText={banner?.showcaseButtonText}
+        showcaseButtonLink={banner?.showcaseButtonLink}
+      />
 
       {/* Categories */}
       <Categories categories={categories} />

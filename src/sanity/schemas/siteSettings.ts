@@ -94,6 +94,26 @@ export const siteSettingsSchema = {
       type: 'string',
       initialValue: '/women',
     },
+    // ── Visual Showcase (mid-page "View Collection" section) ─────────
+    {
+      name: 'showcaseImage',
+      title: 'Showcase Background Image',
+      type: 'image',
+      options: { hotspot: true },
+      description: 'Background image for the "View Collection" section that appears after Best Sellers',
+    },
+    {
+      name: 'showcaseButtonText',
+      title: 'Showcase Button Label',
+      type: 'string',
+      initialValue: 'View Collection',
+    },
+    {
+      name: 'showcaseButtonLink',
+      title: 'Showcase Button Link',
+      type: 'string',
+      initialValue: '/shop',
+    },
     {
       name: 'freeShippingThresholdINR',
       title: 'Free Shipping Threshold (INR)',

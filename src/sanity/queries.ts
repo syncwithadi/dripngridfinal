@@ -358,7 +358,7 @@ export const siteSettingsQuery = `*[_type == "siteSettings"][0] {
   contactPhone
 }`;
 
-// Get banner / homepage hero data
+// Get banner / homepage hero + showcase data
 export const bannerQuery = `*[_type == "siteSettings"][0] {
   "bannerImage": bannerImage.asset->url,
   bannerHeading,
@@ -366,7 +366,10 @@ export const bannerQuery = `*[_type == "siteSettings"][0] {
   bannerButton1Text,
   bannerButton1Link,
   bannerButton2Text,
-  bannerButton2Link
+  bannerButton2Link,
+  "showcaseImage": showcaseImage.asset->url,
+  showcaseButtonText,
+  showcaseButtonLink
 }`;
 
 // Get philosophy section data
