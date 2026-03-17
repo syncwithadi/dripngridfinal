@@ -25,15 +25,21 @@ export default function OtpVerificationModal({
     const [isLoading, setIsLoading] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [codeSent, setCodeSent] = useState(false);   // OTP email delivered
+    const [verified, setVerified] = useState(false);   // Code confirmed correct
     const [resendCooldown, setResendCooldown] = useState(0);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    // Auto-send OTP when modal opens
+    // Auto-send OTP when modal opens (reset state each time)
     useEffect(() => {
         if (isOpen && email) {
+            setOtp(['', '', '', '', '', '']);
+            setError('');
+            setCodeSent(false);
+            setVerified(false);
             sendOtp();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, email]);
 
     // Cooldown timer
@@ -54,7 +60,7 @@ export default function OtpVerificationModal({
     const sendOtp = async () => {
         setIsSending(true);
         setError('');
-        setSuccess('');
+        setCodeSent(false);
 
         try {
             const res = await fetch('/api/auth/send-otp', {
@@ -66,7 +72,7 @@ export default function OtpVerificationModal({
             const data = await res.json();
 
             if (data.success) {
-                setSuccess('Verification code sent to your email');
+                setCodeSent(true);
                 setResendCooldown(60);
             } else {
                 setError(data.error || 'Failed to send OTP');
@@ -127,27 +133,28 @@ export default function OtpVerificationModal({
             const data = await res.json();
 
             if (data.success) {
-                setSuccess('Email verified successfully!');
+                // Show the verified checkmark briefly, then hand off
+                setVerified(true);
                 setTimeout(() => {
-                    // Check if user needs to set password
                     if (data.user.needsPasswordSet) {
                         if (onNeedsPassword) {
                             onNeedsPassword(data.user);
                         } else {
-                            // Fallback if no handler provided (shouldn't happen in updated flow)
                             onVerified(data.user);
                         }
                     } else {
                         onVerified(data.user);
                     }
-                }, 500);
+                }, 900); // enough time to see the animation
             } else {
-                setError(data.error || 'Invalid OTP');
+                setError(data.error || 'Invalid code. Please try again.');
                 setOtp(['', '', '', '', '', '']);
-                inputRefs.current[0]?.focus();
+                setTimeout(() => inputRefs.current[0]?.focus(), 50);
             }
         } catch (err) {
             setError('Verification failed. Please try again.');
+            setOtp(['', '', '', '', '', '']);
+            setTimeout(() => inputRefs.current[0]?.focus(), 50);
         } finally {
             setIsLoading(false);
         }
@@ -239,15 +246,19 @@ export default function OtpVerificationModal({
                     </div>
                 )}
 
-                {/* ── Success overlay ────────────────────────────────── */}
-                {success && !isLoading && !isSending && (
+                {/* ── Verified success overlay — only after correct code ── */}
+                {verified && (
                     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--color-bg)]/95 backdrop-blur-sm">
-                        <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-4" style={{ animation: 'scale-in 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
+                        <div
+                            className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-4"
+                            style={{ animation: 'scale-in 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards' }}
+                        >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7 text-green-500">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
                         </div>
                         <p className="text-sm font-medium text-[var(--color-text)]">Verified!</p>
+                        <p className="text-xs text-[var(--color-text-muted)] mt-1">Placing your order…</p>
                     </div>
                 )}
 
@@ -312,9 +323,19 @@ export default function OtpVerificationModal({
                         ))}
                     </div>
 
+                    {/* Code-sent confirmation (subtle, not an overlay) */}
+                    {codeSent && !error && (
+                        <p className="text-center text-xs text-green-600 mb-3 flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 flex-shrink-0">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                            Code sent — check your inbox
+                        </p>
+                    )}
+
                     {/* Error message */}
                     {error && (
-                        <p className="text-center text-sm text-red-500 mb-4 animate-fade-in">{error}</p>
+                        <p className="text-center text-sm text-red-500 mb-4">{error}</p>
                     )}
 
                     {/* Resend */}
