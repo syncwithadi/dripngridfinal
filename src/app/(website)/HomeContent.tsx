@@ -95,10 +95,10 @@ export default function HomeContent({
         bannerImage={banner?.bannerImage}
         bannerHeading={banner?.bannerHeading}
         bannerSubtitle={banner?.bannerSubtitle}
-        bannerButton1Text={banner?.bannerButton1Text}
-        bannerButton1Link={banner?.bannerButton1Link}
-        bannerButton2Text={banner?.bannerButton2Text}
-        bannerButton2Link={banner?.bannerButton2Link}
+        bannerButton1Text={banner?.bannerButton1Text ?? 'Shop Men'}
+        bannerButton1Link={banner?.bannerButton1Link ?? '/men'}
+        bannerButton2Text={banner?.bannerButton2Text ?? 'Shop Women'}
+        bannerButton2Link={banner?.bannerButton2Link ?? '/women'}
       />
 
       {/* New Arrivals */}
