@@ -34,7 +34,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-6">
-              <span className="text-xl font-black tracking-[0.12em] text-black">DRIPNGRID</span>
+              <span className="text-4xl font-normal tracking-[0.2em] text-black" style={{ fontFamily: 'var(--font-bebas)' }}>DRIPNGRID</span>
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed mb-8 max-w-xs">
               Premium clothing for those who appreciate refined simplicity.

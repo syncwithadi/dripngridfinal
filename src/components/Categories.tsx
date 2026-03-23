@@ -102,7 +102,7 @@ export default function Categories({ categories }: CategoriesProps) {
               <a
                 key={category.slug}
                 href={`/category/${category.slug}`}
-                className="group relative overflow-hidden aspect-[3/4]"
+                className="group relative overflow-hidden aspect-[3/4] rounded-2xl"
               >
                 {/* Background Image */}
                 <Image

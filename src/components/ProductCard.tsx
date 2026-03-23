@@ -67,7 +67,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* ── IMAGE ────────────────────────────────────────────── */}
-        <div className="relative overflow-hidden bg-[#f4f3f0] aspect-[4/5] w-full mb-3">
+        <div className="relative overflow-hidden bg-[#f4f3f0] aspect-[4/5] w-full mb-3 rounded-2xl">
 
           {/* Front image */}
           {frontImageUrl && (
@@ -96,7 +96,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
 
           {/* Badge */}
           {product.badge && (
-            <div className={`absolute top-3 left-3 text-[9px] font-semibold tracking-[0.15em] uppercase px-2.5 py-1 ${product.badge === 'sold-out' ? 'bg-black/60 text-white' : 'bg-black text-white'
+            <div className={`absolute top-3 left-3 text-[9px] font-semibold tracking-[0.15em] uppercase px-2.5 py-1 rounded-md ${product.badge === 'sold-out' ? 'bg-black/60 text-white' : 'bg-black text-white'
               }`}>
               {product.badge === 'sold-out' ? 'Sold Out' : product.badge}
             </div>

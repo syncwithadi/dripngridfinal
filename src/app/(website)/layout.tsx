@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Playfair_Display, Outfit, Bodoni_Moda } from 'next/font/google';
+import { Inter, Playfair_Display, Outfit, Bodoni_Moda, Bebas_Neue } from 'next/font/google';
 import '../globals.css';
 import Navbar from '@/components/Navbar';
 import PromoRibbon from '@/components/PromoRibbon';
@@ -33,6 +33,13 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
+const bebas = Bebas_Neue({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-bebas',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'DRIPNGRID | Premium Fashion',
   description: 'Premium fashion essentials crafted for the discerning individual. Timeless pieces that define understated elegance.',
@@ -62,7 +69,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} ${outfit.variable} ${bodoni.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${outfit.variable} ${bodoni.variable} ${bebas.variable}`}>
       <body className="bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
         <ThemeProvider>
           <AuthProvider>
