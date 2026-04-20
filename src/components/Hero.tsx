@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
+import BorderGlow from '@/components/BorderGlow';
 
 interface HeroImage {
   src: string;
@@ -176,12 +177,24 @@ export default function Hero({ heroImages }: HeroProps) {
           >
             Shop Now
           </a>
-          <a
-            href="/lookbook"
-            className="px-8 py-4 bg-transparent text-white text-xs font-medium tracking-widest uppercase border-2 border-white/50 hover:border-white hover:bg-white hover:text-black transition-all duration-300"
+          <BorderGlow
+            glowColor="0 0 100"
+            backgroundColor="transparent"
+            colors={['#ffffff', '#d4d4d4', '#ffffff']}
+            borderRadius={0}
+            glowRadius={18}
+            glowIntensity={0.9}
+            coneSpread={30}
+            edgeSensitivity={25}
+            animated={true}
           >
-            View Collection
-          </a>
+            <a
+              href="/lookbook"
+              className="block px-8 py-4 text-white text-xs font-medium tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300"
+            >
+              View Collection
+            </a>
+          </BorderGlow>
         </div>
       </div>
 

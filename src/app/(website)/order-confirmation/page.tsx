@@ -24,11 +24,12 @@ function OrderConfirmationContent() {
         return Math.random() * (max - min) + min;
       };
 
-      const interval: any = setInterval(function () {
+      const interval = setInterval(function () {
         const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {
-          return clearInterval(interval);
+          clearInterval(interval);
+          return;
         }
 
         const particleCount = 40 * (timeLeft / duration);
@@ -57,6 +58,9 @@ function OrderConfirmationContent() {
           console.error(err);
           setLoading(false);
         });
+
+      // Cleanup: clear confetti interval if component unmounts early
+      return () => clearInterval(interval);
     }
   }, [orderNumber]);
 

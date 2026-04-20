@@ -48,9 +48,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Verify OTP
+        // Verify OTP using timing-safe comparison to prevent timing attacks
         const hashedOtp = hashOTP(otp);
-        if (hashedOtp !== otpRecord.otp) {
+        const hashedOtpBuf = Buffer.from(hashedOtp);
+        const storedOtpBuf = Buffer.from(otpRecord.otp);
+        const isMatch =
+            hashedOtpBuf.length === storedOtpBuf.length &&
+            crypto.timingSafeEqual(hashedOtpBuf, storedOtpBuf);
+        if (!isMatch) {
             await sanityWriteClient
                 .patch(otpRecord._id)
                 .set({ attempts: otpRecord.attempts + 1 })

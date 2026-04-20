@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { sanityWriteClient } from '@/sanity/client';
 import { hashPassword, generateOTP } from '@/lib/auth';
 import { Resend } from 'resend';
+import crypto from 'crypto';
 
 
 export async function POST(req: Request) {
@@ -30,14 +31,14 @@ export async function POST(req: Request) {
 
         const hashedPassword = await hashPassword(password);
         const otp = generateOTP();
-        // store OTP in a separate document or temporary field. 
-        // For Better security, we should store it in a verificationToken document linked to email.
+        // Hash the OTP before storing — the plain OTP is only sent by email
+        const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-        // Create Verification Token
+        // Create Verification Token (store hash, never plaintext)
         await sanityWriteClient.create({
             _type: 'verification-token',
             identifier: email,
-            token: otp,
+            token: hashedOtp,
             expires: new Date(Date.now() + 15 * 60 * 1000), // 15 mins
         });
 

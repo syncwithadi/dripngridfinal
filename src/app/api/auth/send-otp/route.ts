@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sanityClient, sanityWriteClient } from '@/sanity/client';
 import { Resend } from 'resend';
-import crypto from 'crypto';
+import crypto, { randomInt } from 'crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Generate 6-digit OTP
+// Generate 6-digit OTP using cryptographically secure random
 function generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    let otp = '';
+    for (let i = 0; i < 6; i++) {
+        otp += randomInt(0, 10);
+    }
+    return otp;
 }
 
 // Hash OTP for storage

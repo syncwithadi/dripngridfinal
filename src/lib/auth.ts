@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { randomInt } from 'crypto';
 
 export async function hashPassword(password: string) {
     const salt = await bcrypt.genSalt(10);
@@ -10,10 +11,9 @@ export async function comparePassword(password: string, hash: string) {
 }
 
 export function generateOTP(length: number = 6) {
-    const digits = '0123456789';
     let otp = '';
     for (let i = 0; i < length; i++) {
-        otp += digits[Math.floor(Math.random() * 10)];
+        otp += randomInt(0, 10);
     }
     return otp;
 }

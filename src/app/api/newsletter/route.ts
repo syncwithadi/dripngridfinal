@@ -10,6 +10,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'Email is required' }, { status: 400 });
         }
 
+        // Basic email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email) || email.length > 254) {
+            return NextResponse.json({ message: 'Invalid email address' }, { status: 400 });
+        }
+
         // Check if user already exists
         const existing = await sanityWriteClient.fetch(
             `*[_type == "newsletterSubscriber" && email == $email][0]`,

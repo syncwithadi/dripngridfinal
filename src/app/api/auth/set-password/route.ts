@@ -1,15 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sanityWriteClient } from '@/sanity/client';
 import { hashPassword } from '@/lib/auth';
+import { auth } from '../../../../auth';
 
 export async function POST(request: NextRequest) {
     try {
+        // Require an active session — unauthenticated callers cannot set passwords
+        const session = await auth();
+        if (!session?.user?.email) {
+            return NextResponse.json(
+                { success: false, error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
         const { email, userId, password } = await request.json();
 
         if (!email || !password) {
             return NextResponse.json(
                 { success: false, error: 'Email and password are required' },
                 { status: 400 }
+            );
+        }
+
+        // Ensure the authenticated user can only set their own password
+        if (session.user.email !== email) {
+            return NextResponse.json(
+                { success: false, error: 'Forbidden' },
+                { status: 403 }
             );
         }
 

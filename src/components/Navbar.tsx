@@ -46,14 +46,21 @@ const megaMenu = {
   ],
 };
 
-export default function Navbar() {
+interface NavbarProps {
+  brandLogo?: string;
+  logoWidth?: number;
+  siteName?: string;
+}
+
+export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) {
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMegaOpen, setIsMegaOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [settings, setSettings] = useState<any>(null);
+  // If the logo image fails to load (broken URL, CDN error, etc.) fall back to text wordmark
+  const [logoLoadError, setLogoLoadError] = useState(false);
 
   const { data: session } = useSession();
   const { getTotalItems, openCart } = useCartStore();
@@ -66,18 +73,6 @@ export default function Navbar() {
 
   const cartCount = mounted ? getTotalItems() : 0;
   const wishlistCount = mounted ? getWishlistTotal() : 0;
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { sanityClient: client } = await import('../sanity/client');
-        const { siteSettingsQuery } = await import('../sanity/queries');
-        const data = await client.fetch(siteSettingsQuery);
-        setSettings(data);
-      } catch { }
-    };
-    fetchSettings();
-  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -194,19 +189,20 @@ export default function Navbar() {
             {/* ── WORDMARK — absolutely centred on all screen sizes ── */}
             <div className="absolute inset-x-0 flex justify-center pointer-events-none">
               <Link href="/" onClick={handleLogoClick} className="pointer-events-auto flex items-center">
-                {settings?.brandLogo ? (
+                {brandLogo && !logoLoadError ? (
                   <img
-                    src={settings.brandLogo}
-                    alt={settings.siteName || 'DRIPNGRID'}
-                    style={{ width: settings.logoWidth || 140 }}
+                    src={brandLogo}
+                    alt={siteName || 'DRIPNGRID'}
+                    style={{ width: logoWidth || 140 }}
                     className="h-auto object-contain"
+                    onError={() => setLogoLoadError(true)}
                   />
                 ) : (
                   <span
                     className={`text-[22px] md:text-[26px] font-black tracking-[0.12em] uppercase select-none transition-colors duration-500 ${logoColor}`}
                     style={{ fontFamily: 'var(--font-display), sans-serif' }}
                   >
-                    DRIPNGRID
+                    {siteName || 'DRIPNGRID'}
                   </span>
                 )}
               </Link>

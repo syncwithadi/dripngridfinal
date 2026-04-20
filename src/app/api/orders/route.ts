@@ -120,8 +120,9 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email for COD orders immediately
     if (paymentMethod === 'cod') {
-      import('@/lib/email').then(({ sendOrderConfirmationEmail }) => {
-        sendOrderConfirmationEmail({
+      try {
+        const { sendOrderConfirmationEmail } = await import('@/lib/email');
+        await sendOrderConfirmationEmail({
           customerName: customer.name,
           customerEmail: customer.email,
           orderNumber: orderNumber,
@@ -142,7 +143,9 @@ export async function POST(request: NextRequest) {
             postalCode: shippingAddress.postalCode
           }
         });
-      });
+      } catch (emailErr) {
+        console.error('Failed to send COD order confirmation email:', emailErr);
+      }
     }
 
     return NextResponse.json({
@@ -195,7 +198,9 @@ export async function GET(request: NextRequest) {
 
     const result = await sanityWriteClient.fetch(query, params);
 
-    if (!result) {
+    // When querying by email the result is an array; handle both cases
+    const isEmpty = Array.isArray(result) ? result.length === 0 : !result;
+    if (isEmpty) {
       return NextResponse.json(
         { error: 'Order not found' },
         { status: 404 }
