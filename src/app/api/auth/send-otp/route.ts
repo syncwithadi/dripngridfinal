@@ -3,7 +3,7 @@ import { sanityClient, sanityWriteClient } from '@/sanity/client';
 import { Resend } from 'resend';
 import crypto, { randomInt } from 'crypto';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789');
 
 // Generate 6-digit OTP using cryptographically secure random
 function generateOTP(): string {

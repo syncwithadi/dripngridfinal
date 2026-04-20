@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sanityWriteClient } from '@/sanity/client';
 import { hashPassword } from '@/lib/auth';
-import { auth } from '../../../../auth';
+import { auth } from '../../../../../auth';
 
 export async function POST(request: NextRequest) {
     try {
