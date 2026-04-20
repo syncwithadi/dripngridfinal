@@ -2,6 +2,7 @@
 
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useState, useEffect, useRef } from "react"
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCurrency } from '@/context/CurrencyContext'
@@ -22,10 +23,13 @@ interface UserProfile {
   name: string
   phone: string
   alternatePhone: string
+  dateOfBirth: string
+  gender: string
   address: Address
 }
 
 interface OrderItem {
+  productId?: string
   productName: string
   quantity: number
   size: string
@@ -54,7 +58,7 @@ interface Order {
 }
 
 const emptyAddress: Address = { line1: '', line2: '', city: '', state: '', postalCode: '', country: 'India' }
-const emptyProfile: UserProfile = { name: '', phone: '', alternatePhone: '', address: emptyAddress }
+const emptyProfile: UserProfile = { name: '', phone: '', alternatePhone: '', dateOfBirth: '', gender: '', address: emptyAddress }
 
 const deliveryStatusConfig: Record<string, { label: string; color: string; dot: string }> = {
   pending:    { label: 'Pending',    color: 'text-amber-600',  dot: 'bg-amber-400' },
@@ -70,6 +74,10 @@ const paymentStatusConfig: Record<string, { label: string; color: string }> = {
   pending: { label: 'Pending', color: 'text-amber-600' },
   failed:  { label: 'Failed',  color: 'text-red-500' },
   cod:     { label: 'COD',     color: 'text-blue-600' },
+}
+
+const genderLabels: Record<string, string> = {
+  male: 'Male', female: 'Female', nonbinary: 'Non-binary', prefer_not: 'Prefer not to say',
 }
 
 export default function AccountPage() {
@@ -95,6 +103,8 @@ export default function AccountPage() {
   const [editProfile, setEditProfile] = useState<UserProfile>(emptyProfile)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [addressEditMode, setAddressEditMode] = useState(false)
+  const [accountEditMode, setAccountEditMode] = useState(false)
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -120,6 +130,8 @@ export default function AccountPage() {
               name: u.name || session.user?.name || '',
               phone: u.phone || '',
               alternatePhone: u.alternatePhone || '',
+              dateOfBirth: u.dateOfBirth || '',
+              gender: u.gender || '',
               address: {
                 line1: u.address?.line1 || '',
                 line2: u.address?.line2 || '',
@@ -143,7 +155,7 @@ export default function AccountPage() {
     return () => clearTimeout(t)
   }, [countdown])
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
+  // ── Auth handlers ─────────────────────────────────────────────────────────
   async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
@@ -250,7 +262,8 @@ export default function AccountPage() {
     }
   }
 
-  async function handleSaveProfile(e: React.FormEvent) {
+  // ── Profile save ──────────────────────────────────────────────────────────
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setSaveMsg('')
@@ -263,6 +276,8 @@ export default function AccountPage() {
       const data = await res.json()
       if (data.success) {
         setProfile(editProfile)
+        setAddressEditMode(false)
+        setAccountEditMode(false)
         setSaveMsg('Saved successfully.')
         if (editProfile.name !== session?.user?.name) {
           await updateSession({ name: editProfile.name })
@@ -309,7 +324,7 @@ export default function AccountPage() {
                 {/* User block */}
                 <div className="px-6 py-6 border-b border-gray-100">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-black flex-shrink-0 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-black flex-shrink-0 flex items-center justify-center overflow-hidden">
                       {session.user.image ? (
                         <img src={session.user.image} alt={displayName} className="w-full h-full object-cover" />
                       ) : (
@@ -329,7 +344,7 @@ export default function AccountPage() {
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full text-left px-6 py-3.5 text-sm transition-colors flex items-center justify-between group ${
+                      className={`w-full text-left px-6 py-3.5 text-sm transition-colors flex items-center justify-between ${
                         activeTab === item.id
                           ? 'text-black font-medium bg-gray-50'
                           : 'text-gray-500 hover:text-black hover:bg-gray-50'
@@ -410,14 +425,22 @@ export default function AccountPage() {
                             {/* Product row */}
                             <div className="px-5 py-5">
                               <div className="flex gap-4">
-                                {/* Product image placeholder */}
-                                <div className="w-16 h-20 bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                {/* Product image */}
+                                <div className="w-16 h-20 bg-gray-100 flex-shrink-0 overflow-hidden relative">
                                   {firstItem?.imageUrl ? (
-                                    <img src={firstItem.imageUrl} alt={firstItem.productName} className="w-full h-full object-cover" />
+                                    <Image
+                                      src={firstItem.imageUrl}
+                                      alt={firstItem.productName}
+                                      fill
+                                      className="object-cover"
+                                      sizes="64px"
+                                    />
                                   ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-6 h-6 text-gray-300">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                    </svg>
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-6 h-6 text-gray-300">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                      </svg>
+                                    </div>
                                   )}
                                 </div>
 
@@ -492,142 +515,285 @@ export default function AccountPage() {
               {/* ── SHIPPING ADDRESS ─── */}
               {activeTab === 'address' && (
                 <div>
-                  <h2 className="text-lg font-semibold text-black tracking-wide mb-6">Shipping Address</h2>
-                  <form onSubmit={handleSaveProfile} className="bg-white border border-gray-200 p-6 md:p-8 space-y-4">
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Address Line 1</label>
-                        <input
-                          type="text"
-                          value={editProfile.address.line1}
-                          onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, line1: e.target.value } }))}
-                          className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                          placeholder="Street address"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Address Line 2</label>
-                        <input
-                          type="text"
-                          value={editProfile.address.line2}
-                          onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, line2: e.target.value } }))}
-                          className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                          placeholder="Apartment, floor, etc. (optional)"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">City</label>
-                          <input
-                            type="text"
-                            value={editProfile.address.city}
-                            onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, city: e.target.value } }))}
-                            className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                            placeholder="City"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">State</label>
-                          <input
-                            type="text"
-                            value={editProfile.address.state}
-                            onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, state: e.target.value } }))}
-                            className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                            placeholder="State"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Postal Code</label>
-                          <input
-                            type="text"
-                            value={editProfile.address.postalCode}
-                            onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, postalCode: e.target.value } }))}
-                            className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                            placeholder="PIN code"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Country</label>
-                          <input
-                            type="text"
-                            value={editProfile.address.country}
-                            onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, country: e.target.value } }))}
-                            className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                            placeholder="Country"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {saveMsg && (
-                      <p className={`text-xs ${saveMsg.includes('success') || saveMsg.includes('Saved') ? 'text-green-600' : 'text-red-500'}`}>
-                        {saveMsg}
-                      </p>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-semibold text-black tracking-wide">Shipping Address</h2>
+                    {!addressEditMode && (
+                      <button
+                        onClick={() => { setEditProfile(profile); setAddressEditMode(true); setSaveMsg('') }}
+                        className="text-xs text-black underline underline-offset-4 hover:opacity-60 transition-opacity"
+                      >
+                        Edit
+                      </button>
                     )}
+                  </div>
 
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="w-full bg-black text-white py-3 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-black/80 transition-colors disabled:opacity-50"
-                    >
-                      {saving ? 'Saving…' : 'Save Address'}
-                    </button>
-                  </form>
+                  <div className="bg-white border border-gray-200 overflow-hidden">
+                    {!addressEditMode ? (
+                      /* ── Read-only view ── */
+                      <div className="p-6 md:p-8">
+                        {profile.address.line1 ? (
+                          <div className="space-y-1.5">
+                            <p className="text-sm text-black">{profile.address.line1}</p>
+                            {profile.address.line2 && <p className="text-sm text-black">{profile.address.line2}</p>}
+                            <p className="text-sm text-black">
+                              {[profile.address.city, profile.address.state, profile.address.postalCode].filter(Boolean).join(', ')}
+                            </p>
+                            <p className="text-sm text-black">{profile.address.country}</p>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-400">No address saved yet.</p>
+                        )}
+                      </div>
+                    ) : (
+                      /* ── Edit form ── */
+                      <form onSubmit={handleSave} className="p-6 md:p-8 space-y-4">
+                        <div>
+                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Address Line 1</label>
+                          <input
+                            type="text"
+                            value={editProfile.address.line1}
+                            onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, line1: e.target.value } }))}
+                            className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                            placeholder="Street address"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Address Line 2</label>
+                          <input
+                            type="text"
+                            value={editProfile.address.line2}
+                            onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, line2: e.target.value } }))}
+                            className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                            placeholder="Apartment, floor, etc. (optional)"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">City</label>
+                            <input
+                              type="text"
+                              value={editProfile.address.city}
+                              onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, city: e.target.value } }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                              placeholder="City"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">State</label>
+                            <input
+                              type="text"
+                              value={editProfile.address.state}
+                              onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, state: e.target.value } }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                              placeholder="State"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Postal Code</label>
+                            <input
+                              type="text"
+                              value={editProfile.address.postalCode}
+                              onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, postalCode: e.target.value } }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                              placeholder="PIN code"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Country</label>
+                            <input
+                              type="text"
+                              value={editProfile.address.country}
+                              onChange={e => setEditProfile(p => ({ ...p, address: { ...p.address, country: e.target.value } }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                              placeholder="Country"
+                            />
+                          </div>
+                        </div>
+
+                        {saveMsg && (
+                          <p className={`text-xs ${saveMsg.includes('success') || saveMsg.includes('Saved') ? 'text-green-600' : 'text-red-500'}`}>
+                            {saveMsg}
+                          </p>
+                        )}
+
+                        <div className="flex gap-3 pt-1">
+                          <button
+                            type="submit"
+                            disabled={saving}
+                            className="flex-1 bg-black text-white py-3 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-black/80 transition-colors disabled:opacity-50"
+                          >
+                            {saving ? 'Saving…' : 'Save Changes'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setAddressEditMode(false); setEditProfile(profile); setSaveMsg('') }}
+                            className="px-5 py-3 border border-gray-200 text-[11px] font-bold tracking-[0.2em] uppercase text-gray-500 hover:text-black hover:border-black transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
                 </div>
               )}
 
               {/* ── ACCOUNT DETAILS ─── */}
               {activeTab === 'account' && (
                 <div>
-                  <h2 className="text-lg font-semibold text-black tracking-wide mb-6">Account Details</h2>
-                  <form onSubmit={handleSaveProfile} className="bg-white border border-gray-200 p-6 md:p-8 space-y-4">
-                    {/* Read-only email */}
-                    <div>
-                      <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Email Address</label>
-                      <div className="border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm text-gray-400">
-                        {session.user.email}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Full Name</label>
-                        <input
-                          type="text"
-                          value={editProfile.name}
-                          onChange={e => setEditProfile(p => ({ ...p, name: e.target.value }))}
-                          className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                          placeholder="Your name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Phone</label>
-                        <input
-                          type="tel"
-                          value={editProfile.phone}
-                          onChange={e => setEditProfile(p => ({ ...p, phone: e.target.value }))}
-                          className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
-                          placeholder="+91 98765 43210"
-                        />
-                      </div>
-                    </div>
-
-                    {saveMsg && (
-                      <p className={`text-xs ${saveMsg.includes('success') || saveMsg.includes('Saved') ? 'text-green-600' : 'text-red-500'}`}>
-                        {saveMsg}
-                      </p>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-semibold text-black tracking-wide">Account Details</h2>
+                    {!accountEditMode && (
+                      <button
+                        onClick={() => { setEditProfile(profile); setAccountEditMode(true); setSaveMsg('') }}
+                        className="text-xs text-black underline underline-offset-4 hover:opacity-60 transition-opacity"
+                      >
+                        Edit
+                      </button>
                     )}
+                  </div>
 
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="w-full bg-black text-white py-3 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-black/80 transition-colors disabled:opacity-50"
-                    >
-                      {saving ? 'Saving…' : 'Save Changes'}
-                    </button>
-                  </form>
+                  <div className="bg-white border border-gray-200 overflow-hidden">
+                    {!accountEditMode ? (
+                      /* ── Read-only view ── */
+                      <div className="p-6 md:p-8 space-y-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                          <div>
+                            <p className="text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1">Email</p>
+                            <p className="text-sm text-black">{session.user.email}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1">Full Name</p>
+                            <p className="text-sm text-black">{profile.name || <span className="text-gray-400">—</span>}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1">Phone</p>
+                            <p className="text-sm text-black">{profile.phone || <span className="text-gray-400">—</span>}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1">Alternate Phone</p>
+                            <p className="text-sm text-black">{profile.alternatePhone || <span className="text-gray-400">—</span>}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1">Date of Birth</p>
+                            <p className="text-sm text-black">
+                              {profile.dateOfBirth
+                                ? new Date(profile.dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                                : <span className="text-gray-400">—</span>}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1">Gender</p>
+                            <p className="text-sm text-black">{profile.gender ? genderLabels[profile.gender] || profile.gender : <span className="text-gray-400">—</span>}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* ── Edit form ── */
+                      <form onSubmit={handleSave} className="p-6 md:p-8 space-y-4">
+                        {/* Read-only email */}
+                        <div>
+                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Email Address</label>
+                          <div className="border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm text-gray-400">
+                            {session.user.email}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Full Name</label>
+                            <input
+                              type="text"
+                              value={editProfile.name}
+                              onChange={e => setEditProfile(p => ({ ...p, name: e.target.value }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                              placeholder="Your name"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Phone</label>
+                            <input
+                              type="tel"
+                              value={editProfile.phone}
+                              onChange={e => setEditProfile(p => ({ ...p, phone: e.target.value }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                              placeholder="+91 98765 43210"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Alternate Phone <span className="normal-case text-gray-300">(optional)</span></label>
+                            <input
+                              type="tel"
+                              value={editProfile.alternatePhone}
+                              onChange={e => setEditProfile(p => ({ ...p, alternatePhone: e.target.value }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                              placeholder="+91 99999 00000"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-1.5">Date of Birth <span className="normal-case text-gray-300">(optional)</span></label>
+                            <input
+                              type="date"
+                              value={editProfile.dateOfBirth}
+                              onChange={e => setEditProfile(p => ({ ...p, dateOfBirth: e.target.value }))}
+                              className="w-full border border-gray-200 px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Gender */}
+                        <div>
+                          <label className="block text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-2.5">Gender <span className="normal-case text-gray-300">(optional)</span></label>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { value: 'male',       label: 'Male' },
+                              { value: 'female',     label: 'Female' },
+                              { value: 'nonbinary',  label: 'Non-binary' },
+                              { value: 'prefer_not', label: 'Prefer not to say' },
+                            ].map(opt => (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => setEditProfile(p => ({ ...p, gender: p.gender === opt.value ? '' : opt.value }))}
+                                className={`px-4 py-2 text-xs border transition-colors ${
+                                  editProfile.gender === opt.value
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-black hover:text-black'
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {saveMsg && (
+                          <p className={`text-xs ${saveMsg.includes('success') || saveMsg.includes('Saved') ? 'text-green-600' : 'text-red-500'}`}>
+                            {saveMsg}
+                          </p>
+                        )}
+
+                        <div className="flex gap-3 pt-1">
+                          <button
+                            type="submit"
+                            disabled={saving}
+                            className="flex-1 bg-black text-white py-3 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-black/80 transition-colors disabled:opacity-50"
+                          >
+                            {saving ? 'Saving…' : 'Save Changes'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setAccountEditMode(false); setEditProfile(profile); setSaveMsg('') }}
+                            className="px-5 py-3 border border-gray-200 text-[11px] font-bold tracking-[0.2em] uppercase text-gray-500 hover:text-black hover:border-black transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
                 </div>
               )}
 

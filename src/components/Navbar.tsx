@@ -57,6 +57,7 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMegaOpen, setIsMegaOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   // If the logo image fails to load (broken URL, CDN error, etc.) fall back to text wordmark
@@ -70,6 +71,8 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
   const pathname = usePathname();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const megaRef = useRef<HTMLDivElement>(null);
+  const drawerCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [drawerTab, setDrawerTab] = useState<'shop' | 'account' | 'info'>('shop');
 
   const cartCount = mounted ? getTotalItems() : 0;
   const wishlistCount = mounted ? getWishlistTotal() : 0;
@@ -82,9 +85,9 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = isMobileOpen ? 'hidden' : '';
+    document.body.style.overflow = (isMobileOpen || isNavDrawerOpen) ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [isMobileOpen]);
+  }, [isMobileOpen, isNavDrawerOpen]);
 
   useEffect(() => {
     if (isSearchOpen) setTimeout(() => searchInputRef.current?.focus(), 80);
@@ -103,7 +106,19 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
     }
   };
 
-  const closeMega = () => setIsMegaOpen(false);
+  const closeMega = () => setIsMegaOpen(false)
+
+  const openDrawer = () => {
+    if (drawerCloseTimer.current) clearTimeout(drawerCloseTimer.current)
+    setIsNavDrawerOpen(true)
+  }
+  const scheduleCloseDrawer = () => {
+    drawerCloseTimer.current = setTimeout(() => setIsNavDrawerOpen(false), 80)
+  }
+  const cancelDrawerClose = () => {
+    if (drawerCloseTimer.current) clearTimeout(drawerCloseTimer.current)
+  }
+  const closeDrawerNow = () => setIsNavDrawerOpen(false);
 
   // Only use transparent/white-text hero style on the home page when not yet scrolled
   const isHomePage = pathname === '/';
@@ -277,16 +292,18 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
                 )}
               </button>
 
-              {/* ── HAMBURGER (desktop) — opens mega menu ───── */}
-              <button
-                onClick={() => setIsMegaOpen(v => !v)}
-                className={`hidden lg:flex flex-col justify-center gap-[4px] p-2 ml-1 rounded-lg transition-colors ${isMegaOpen ? (onDark ? 'bg-white/10' : 'bg-gray-100') : (onDark ? 'hover:bg-white/10' : 'hover:bg-gray-100')}`}
-                aria-label="Browse categories"
+              {/* ── NAV DRAWER TOGGLE (desktop) ───── */}
+              {/* Nav drawer trigger — temporarily hidden */}
+              {/* <button
+                onMouseEnter={openDrawer}
+                onMouseLeave={scheduleCloseDrawer}
+                className={`hidden lg:flex flex-col justify-center gap-[4px] p-2 ml-1 rounded-lg transition-colors ${isNavDrawerOpen ? (onDark ? 'bg-white/10' : 'bg-gray-100') : (onDark ? 'hover:bg-white/10' : 'hover:bg-gray-100')}`}
+                aria-label="Navigation menu"
               >
                 <span className={`w-4 h-px block ${lineColor}`} />
                 <span className={`w-4 h-px block ${lineColor}`} />
                 <span className={`w-3 h-px block ${lineColor}`} />
-              </button>
+              </button> */}
             </div>
           </div>
         </nav>
@@ -353,6 +370,87 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
           </div>
         </div>
       </header>
+
+      {/* ── NAV DRAWER (desktop) ────────────────────────────────────────────── */}
+      {/* Starts at bottom of navbar, goes full height, never touches the navbar */}
+      <div
+        onMouseEnter={cancelDrawerClose}
+        onMouseLeave={scheduleCloseDrawer}
+        className={`hidden lg:flex fixed right-0 w-[260px] bg-black z-[200] flex-col transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          isNavDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ top: 56, height: 'calc(100vh - 56px)' }}
+      >
+        {/* Tabs */}
+        <div className="flex border-b border-white/10 flex-shrink-0">
+          {(['shop', 'account', 'info'] as const).map(tab => (
+            <button
+              key={tab}
+              onMouseEnter={() => setDrawerTab(tab)}
+              onClick={() => setDrawerTab(tab)}
+              className={`flex-1 py-3.5 text-[10px] font-bold tracking-[0.2em] uppercase transition-colors ${
+                drawerTab === tab
+                  ? 'text-white border-b-2 border-white -mb-px'
+                  : 'text-white/30 hover:text-white/70'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Links */}
+        <div className="flex-1 overflow-y-auto">
+          {(drawerTab === 'shop' ? [
+            { href: '/new-arrivals',         label: 'New Arrivals' },
+            { href: '/bestsellers',          label: 'Bestsellers' },
+            { href: '/men',                  label: "Men's Edit" },
+            { href: '/women',                label: "Women's Edit" },
+            { href: '/lookbook',             label: 'Lookbook' },
+            { href: '/shop',                 label: 'All Products' },
+            { href: '/shop?cat=tshirts',     label: 'Oversized T-Shirts' },
+            { href: '/shop?cat=hoodies',     label: 'Hoodies' },
+            { href: '/shop?cat=sweatshirts', label: 'Sweatshirts' },
+            { href: '/shop?cat=cargos',      label: 'Cargos' },
+            { href: '/shop?cat=trackpants',  label: 'Track Pants' },
+            { href: '/shop?cat=jackets',     label: 'Jackets' },
+            { href: '/shop?cat=caps',        label: 'Caps' },
+          ] : drawerTab === 'account' ? [
+            { href: '/account',      label: session?.user ? 'My Account' : 'Sign In' },
+            { href: '/orders',       label: 'Order History' },
+            { href: '/wishlist',     label: 'Saved Items' },
+            { href: '/track-order',  label: 'Track Order' },
+          ] : [
+            { href: '/about',                      label: 'About Us' },
+            { href: '/faq',                        label: 'FAQs' },
+            { href: '/size-guide',                 label: 'Size Guide' },
+            { href: '/returns',                    label: 'Returns & Exchange' },
+            { href: '/shipping',                   label: 'Shipping Info' },
+            { href: '/journal',                    label: 'Journal' },
+            { href: 'mailto:support@dripngrid.in', label: 'Contact Us' },
+          ]).map(link => (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={closeDrawerNow}
+              className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] group hover:bg-white/[0.05] transition-colors"
+            >
+              <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-white group-hover:text-white/70 transition-colors">
+                {link.label}
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
+                className="w-3 h-3 flex-shrink-0 text-white/20 group-hover:text-white/50 transition-colors">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-white/10 flex-shrink-0">
+          <p className="text-[8px] text-white/20 tracking-[0.2em] uppercase">Drip So Sharp, It Cuts.</p>
+        </div>
+      </div>
 
       {/* ── MOBILE MENU ─────────────────────────────────────────────────────── */}
       <div className={`fixed inset-0 bg-white z-[999] lg:hidden flex flex-col transition-all duration-300 ${isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>

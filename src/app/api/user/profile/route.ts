@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
         const { sanityClient } = await import('@/sanity/client');
         const user = await sanityClient.fetch(
             `*[_type == "user" && email == $email][0]{
-        _id, name, email, phone, alternatePhone,
+        _id, name, email, phone, alternatePhone, dateOfBirth, gender,
         address { line1, line2, city, state, postalCode, country }
       }`,
             { email: session.user.email }
@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { name, phone, alternatePhone, address } = body;
+        const { name, phone, alternatePhone, dateOfBirth, gender, address } = body;
 
         const { sanityClient, sanityWriteClient } = await import('@/sanity/client');
 
@@ -49,6 +49,8 @@ export async function PATCH(req: NextRequest) {
         if (name !== undefined) patch.name = name;
         if (phone !== undefined) patch.phone = phone;
         if (alternatePhone !== undefined) patch.alternatePhone = alternatePhone;
+        if (dateOfBirth !== undefined) patch.dateOfBirth = dateOfBirth;
+        if (gender !== undefined) patch.gender = gender;
         if (address !== undefined) patch.address = address;
 
         await sanityWriteClient.patch(user._id).set(patch).commit();

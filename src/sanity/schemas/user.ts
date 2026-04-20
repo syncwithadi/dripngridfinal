@@ -73,6 +73,26 @@ export default defineType({
             fieldset: 'profile',
         }),
         defineField({
+            name: 'dateOfBirth',
+            title: 'Date of Birth',
+            type: 'date',
+            fieldset: 'profile',
+        }),
+        defineField({
+            name: 'gender',
+            title: 'Gender',
+            type: 'string',
+            fieldset: 'profile',
+            options: {
+                list: [
+                    { title: 'Male', value: 'male' },
+                    { title: 'Female', value: 'female' },
+                    { title: 'Non-binary', value: 'nonbinary' },
+                    { title: 'Prefer not to say', value: 'prefer_not' },
+                ],
+            },
+        }),
+        defineField({
             name: 'address',
             title: 'Address',
             type: 'object',

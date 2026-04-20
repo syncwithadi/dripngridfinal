@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
       customer,
       items: items.map((item) => ({
         _key: `${item.productId}-${item.size}-${item.color}`,
+        productId: item.productId,
         productName: item.productName,
         size: item.size,
         color: item.color,
@@ -185,14 +186,16 @@ export async function GET(request: NextRequest) {
     let query = '';
     let params: Record<string, string> = {};
 
+    const itemsProjection = `items[] { ..., "imageUrl": *[_type == "product" && _id == ^.productId][0].images.front.asset->url }`;
+
     if (orderId) {
-      query = `*[_type == "order" && _id == $orderId][0]`;
+      query = `*[_type == "order" && _id == $orderId][0]{ ..., ${itemsProjection} }`;
       params = { orderId };
     } else if (orderNumber) {
-      query = `*[_type == "order" && orderNumber == $orderNumber][0]`;
+      query = `*[_type == "order" && orderNumber == $orderNumber][0]{ ..., ${itemsProjection} }`;
       params = { orderNumber };
     } else if (email) {
-      query = `*[_type == "order" && customer.email == $email] | order(createdAt desc)`;
+      query = `*[_type == "order" && customer.email == $email] | order(createdAt desc) { ..., ${itemsProjection} }`;
       params = { email };
     }
 
