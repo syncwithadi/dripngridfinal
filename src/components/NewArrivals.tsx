@@ -56,16 +56,13 @@ export default function NewArrivals({ products, onQuickView }: NewArrivalsProps)
     <section ref={sectionRef} id="new-arrivals" className="py-16 md:py-24 bg-white">
       <div className="container-custom">
         {/* Section Header — Bluorng style: left title, right "Discover more" pill */}
-        <div ref={headerRef} className="flex items-end justify-between mb-10 md:mb-14">
-          <div>
-            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400 mb-2">Just In</p>
-            <h2 className="text-2xl md:text-3xl font-light tracking-wide text-black">
-              Latest Drop
-            </h2>
-          </div>
+        <div ref={headerRef} className="flex items-center justify-between mb-10 md:mb-14">
+          <h2 className="text-xl md:text-2xl font-medium tracking-wide text-black">
+            Latest drop
+          </h2>
           <Link
             href="/new-arrivals"
-            className="text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-colors duration-200 underline-offset-4 hover:underline"
+            className="text-[11px] tracking-[0.15em] uppercase text-black border border-black/20 hover:border-black px-4 py-2 rounded-full transition-all duration-200 hover:bg-black hover:text-white"
           >
             Discover more
           </Link>

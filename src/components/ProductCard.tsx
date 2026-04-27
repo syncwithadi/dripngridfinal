@@ -102,19 +102,26 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
             </div>
           )}
 
-          {/* Bookmark — top right, fades in on hover */}
+          {/* Bookmark — top right, always visible */}
           <button
             suppressHydrationWarning
             onClick={handleWishlist}
-            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-sm transition-all duration-300
-              ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}
-              ${isWishlisted ? 'text-black' : 'text-gray-400 hover:text-black'}`}
+            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-200
+              ${isWishlisted ? 'text-black' : 'text-gray-500 hover:text-black'}`}
             aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill={isWishlisted ? 'currentColor' : 'none'} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
             </svg>
           </button>
+
+          {/* Dot indicators — bottom center */}
+          {backImageUrl && (
+            <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1 pointer-events-none">
+              <span className={`block w-1.5 h-1.5 rounded-full transition-all duration-300 ${isHovered ? 'bg-white/50' : 'bg-white/90'}`} />
+              <span className={`block w-1.5 h-1.5 rounded-full transition-all duration-300 ${isHovered ? 'bg-white/90' : 'bg-white/50'}`} />
+            </div>
+          )}
         </div>
 
         {/* ── PRODUCT INFO ─────────────────────────────────────── */}

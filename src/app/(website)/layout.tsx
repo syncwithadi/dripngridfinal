@@ -81,7 +81,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} ${outfit.variable} ${bodoni.variable} ${bebas.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${outfit.variable} ${bodoni.variable} ${bebas.variable}`} suppressHydrationWarning>
       <body className="bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
         <ThemeProvider>
           <AuthProvider>

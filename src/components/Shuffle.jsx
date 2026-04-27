@@ -50,6 +50,20 @@ const Shuffle = ({
     } else setFontsLoaded(true);
   }, []);
 
+  // In production (Vercel/CDN), fonts with display:swap and next/font can cause
+  // layout to settle after document.fonts.ready resolves, giving ScrollTrigger
+  // a stale cached position. Refreshing after window load fixes this.
+  useEffect(() => {
+    const refresh = () => ScrollTrigger.refresh();
+    if (document.readyState === 'complete') {
+      // Already loaded — refresh on next tick so React finishes painting first
+      const t = setTimeout(refresh, 50);
+      return () => clearTimeout(t);
+    }
+    window.addEventListener('load', refresh);
+    return () => window.removeEventListener('load', refresh);
+  }, []);
+
   const scrollTriggerStart = useMemo(() => {
     const startPct = (1 - threshold) * 100;
     const mm = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin || '');
@@ -296,6 +310,11 @@ const Shuffle = ({
       };
 
       const st = ScrollTrigger.create({ trigger: el, start, once: triggerOnce, onEnter: create });
+
+      // Safety net: if the element is already in/above the viewport when this
+      // runs (can happen on fast production loads), ScrollTrigger may not fire
+      // onEnter. Force a refresh so it re-evaluates positions.
+      ScrollTrigger.refresh();
 
       return () => {
         st.kill();

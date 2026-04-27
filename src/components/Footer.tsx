@@ -197,6 +197,7 @@ export default function Footer() {
             ) : (
               <form onSubmit={handleSubscribe} className="flex items-center border-b border-white/30 focus-within:border-white transition-colors">
                 <input
+                  suppressHydrationWarning
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -205,6 +206,7 @@ export default function Footer() {
                   className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 py-3 outline-none"
                 />
                 <button
+                  suppressHydrationWarning
                   type="submit"
                   disabled={status === 'loading'}
                   className="pl-4 py-3 text-white/50 hover:text-white transition-colors disabled:opacity-40"

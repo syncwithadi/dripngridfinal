@@ -42,15 +42,15 @@ export default function PremiumBanner({
     return () => ctx.revert();
   }, []);
 
-  const bgImage = bannerImage || '/images/hero-banner.webp';
+  const bgImage = bannerImage || '/images/newlandingpage%202.png';
 
   return (
     <div className="relative w-full h-screen overflow-hidden -mt-[96px]">
 
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-top bg-no-repeat"
-        style={{ backgroundImage: `url('${bgImage}')` }}
+        className="absolute inset-0 bg-no-repeat"
+        style={{ backgroundImage: `url('${bgImage}')`, backgroundSize: '100% 100%', backgroundPosition: 'center' }}
       />
 
       {/* Top gradient — only covers navbar area so icons stay visible */}
