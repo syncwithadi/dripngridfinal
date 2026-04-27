@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 
@@ -14,6 +14,11 @@ interface PremiumBannerProps {
   bannerButton2Link?: string | null;
 }
 
+const SLIDES = [
+  '/images/newlandingpage%202.png',
+  '/images/new%20landing%20page%203.png',
+];
+
 export default function PremiumBanner({
   bannerImage,
   bannerHeading,
@@ -26,6 +31,39 @@ export default function PremiumBanner({
   const ctaRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
 
+  // If a custom bannerImage is passed, skip the slideshow
+  const images = bannerImage ? [bannerImage] : SLIDES;
+
+  const [current, setCurrent] = useState(0);
+  const [next, setNext] = useState<number | null>(null);
+  const [sliding, setSliding] = useState(false);
+
+  // Auto-advance slideshow
+  useEffect(() => {
+    if (images.length < 2) return;
+
+    const timer = setTimeout(() => {
+      triggerSlide((current + 1) % images.length);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [current, images.length]);
+
+  const triggerSlide = (nextIndex: number) => {
+    if (sliding) return;
+    setNext(nextIndex);
+    setSliding(true);
+  };
+
+  // Once slide animation ends, commit the transition
+  const handleTransitionEnd = () => {
+    if (next === null) return;
+    setCurrent(next);
+    setNext(null);
+    setSliding(false);
+  };
+
+  // GSAP fade-in for CTA / heading
   useEffect(() => {
     const ctx = gsap.context(() => {
       const targets = [headingRef.current, ctaRef.current].filter(Boolean);
@@ -42,24 +80,46 @@ export default function PremiumBanner({
     return () => ctx.revert();
   }, []);
 
-  const bgImage = bannerImage || '/images/newlandingpage%202.png';
+  const slideStyle = (img: string): React.CSSProperties => ({
+    backgroundImage: `url('${img}')`,
+    backgroundSize: '100% 100%',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  });
 
   return (
     <div className="relative w-full h-screen overflow-hidden -mt-[96px]">
 
-      {/* Background image */}
+      {/* Current image */}
       <div
-        className="absolute inset-0 bg-no-repeat"
-        style={{ backgroundImage: `url('${bgImage}')`, backgroundSize: '100% 100%', backgroundPosition: 'center' }}
+        className="absolute inset-0"
+        style={{
+          ...slideStyle(images[current]),
+          transform: sliding ? 'translateX(-100%)' : 'translateX(0)',
+          transition: sliding ? 'transform 0.85s cubic-bezier(0.77,0,0.18,1)' : 'none',
+        }}
       />
 
-      {/* Top gradient — only covers navbar area so icons stay visible */}
+      {/* Next image (slides in from right) */}
+      {sliding && next !== null && (
+        <div
+          className="absolute inset-0"
+          style={{
+            ...slideStyle(images[next]),
+            transform: sliding ? 'translateX(0)' : 'translateX(100%)',
+            transition: 'transform 0.85s cubic-bezier(0.77,0,0.18,1)',
+          }}
+          onTransitionEnd={handleTransitionEnd}
+        />
+      )}
+
+      {/* Top gradient */}
       <div
-        className="absolute inset-x-0 top-0 h-40 pointer-events-none"
+        className="absolute inset-x-0 top-0 h-40 pointer-events-none z-10"
         style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)' }}
       />
 
-      {/* Optional heading / subtitle overlay (centre of banner) */}
+      {/* Optional heading / subtitle overlay */}
       {(bannerHeading || bannerSubtitle) && (
         <div
           ref={headingRef}
@@ -78,7 +138,7 @@ export default function PremiumBanner({
         </div>
       )}
 
-      {/* Bottom-left CTA — glassmorphism style */}
+      {/* Bottom-left CTA */}
       <div
         ref={ctaRef}
         className="absolute bottom-[30%] md:bottom-[18%] left-6 md:left-10 z-10 flex flex-col sm:flex-row items-start sm:items-center gap-3"
@@ -100,6 +160,22 @@ export default function PremiumBanner({
           </Link>
         )}
       </div>
+
+      {/* Slide indicators */}
+      {images.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => triggerSlide(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/50'
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
