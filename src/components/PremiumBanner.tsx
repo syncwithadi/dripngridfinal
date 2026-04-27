@@ -31,39 +31,33 @@ export default function PremiumBanner({
   const ctaRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
 
-  // If a custom bannerImage is passed, skip the slideshow
   const images = bannerImage ? [bannerImage] : SLIDES;
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [prevIdx, setPrevIdx] = useState<number | null>(null);
+  const [fading, setFading] = useState(false);
 
-  const [current, setCurrent] = useState(0);
-  const [next, setNext] = useState<number | null>(null);
-  const [sliding, setSliding] = useState(false);
-
-  // Auto-advance slideshow
+  // Auto-advance every 3s
   useEffect(() => {
     if (images.length < 2) return;
+    const t = setTimeout(() => {
+      setPrevIdx(activeIdx);
+      setActiveIdx((activeIdx + 1) % images.length);
+      setFading(true);
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [activeIdx, images.length]);
 
-    const timer = setTimeout(() => {
-      triggerSlide((current + 1) % images.length);
-    }, 2500);
+  // Clear fade state after transition completes
+  useEffect(() => {
+    if (!fading) return;
+    const t = setTimeout(() => {
+      setFading(false);
+      setPrevIdx(null);
+    }, 1600);
+    return () => clearTimeout(t);
+  }, [fading]);
 
-    return () => clearTimeout(timer);
-  }, [current, images.length]);
-
-  const triggerSlide = (nextIndex: number) => {
-    if (sliding) return;
-    setNext(nextIndex);
-    setSliding(true);
-  };
-
-  // Once slide animation ends, commit the transition
-  const handleTransitionEnd = () => {
-    if (next === null) return;
-    setCurrent(next);
-    setNext(null);
-    setSliding(false);
-  };
-
-  // GSAP fade-in for CTA / heading
+  // GSAP intro for CTA / heading
   useEffect(() => {
     const ctx = gsap.context(() => {
       const targets = [headingRef.current, ctaRef.current].filter(Boolean);
@@ -80,38 +74,47 @@ export default function PremiumBanner({
     return () => ctx.revert();
   }, []);
 
-  const slideStyle = (img: string): React.CSSProperties => ({
-    backgroundImage: `url('${img}')`,
-    backgroundSize: '100% 100%',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-  });
-
   return (
     <div className="relative w-full h-screen overflow-hidden -mt-[96px]">
 
-      {/* Current image */}
-      <div
-        className="absolute inset-0"
-        style={{
-          ...slideStyle(images[current]),
-          transform: sliding ? 'translateX(-100%)' : 'translateX(0)',
-          transition: sliding ? 'transform 0.85s cubic-bezier(0.77,0,0.18,1)' : 'none',
-        }}
-      />
-
-      {/* Next image (slides in from right) */}
-      {sliding && next !== null && (
+      {/* Previous image — fades out with subtle zoom */}
+      {fading && prevIdx !== null && (
         <div
           className="absolute inset-0"
           style={{
-            ...slideStyle(images[next]),
-            transform: sliding ? 'translateX(0)' : 'translateX(100%)',
-            transition: 'transform 0.85s cubic-bezier(0.77,0,0.18,1)',
+            backgroundImage: `url('${images[prevIdx]}')`,
+            backgroundSize: '100% 100%',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            animation: 'fadeZoomOut 1.6s ease-in-out forwards',
           }}
-          onTransitionEnd={handleTransitionEnd}
         />
       )}
+
+      {/* Active image — fades in with subtle zoom */}
+      <div
+        key={activeIdx}
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url('${images[activeIdx]}')`,
+          backgroundSize: '100% 100%',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          animation: fading ? 'fadeZoomIn 1.6s ease-in-out forwards' : 'none',
+        }}
+      />
+
+      {/* Keyframe styles */}
+      <style>{`
+        @keyframes fadeZoomIn {
+          0%   { opacity: 0; transform: scale(1.04); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeZoomOut {
+          0%   { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(0.97); }
+        }
+      `}</style>
 
       {/* Top gradient */}
       <div
@@ -119,7 +122,7 @@ export default function PremiumBanner({
         style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)' }}
       />
 
-      {/* Optional heading / subtitle overlay */}
+      {/* Optional heading / subtitle */}
       {(bannerHeading || bannerSubtitle) && (
         <div
           ref={headingRef}
@@ -161,17 +164,15 @@ export default function PremiumBanner({
         )}
       </div>
 
-      {/* Slide indicators */}
+      {/* Dot indicators */}
       {images.length > 1 && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
           {images.map((_, i) => (
-            <button
+            <div
               key={i}
-              onClick={() => triggerSlide(i)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/50'
+              className={`h-[2px] rounded-full transition-all duration-700 ${
+                i === activeIdx ? 'w-8 bg-white' : 'w-3 bg-white/35'
               }`}
-              aria-label={`Go to slide ${i + 1}`}
             />
           ))}
         </div>
