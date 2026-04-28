@@ -110,16 +110,14 @@ export default function HomeContent({
       {/* Divider between landing banner and sections below */}
       <div className="w-full h-px bg-gray-200" />
 
-      {/* On mobile: GenderBanner appears first, then New Arrivals.
-          On desktop: New Arrivals first, then GenderBanner — achieved via CSS order. */}
-      <div className="flex flex-col">
-        <div className="order-2 md:order-1">
-          <NewArrivals products={newArrivals} onQuickView={handleQuickView} />
-        </div>
-        <div className="order-1 md:order-2">
-          <GenderBanner />
-        </div>
-      </div>
+      {/* Shop Men / Shop Women banners — same order on mobile and desktop */}
+      <GenderBanner />
+
+      {/* Divider */}
+      <div className="w-full h-px bg-gray-200" />
+
+      {/* New Arrivals */}
+      <NewArrivals products={newArrivals} onQuickView={handleQuickView} />
 
       {/* Divider */}
       <div className="w-full h-px bg-gray-200" />

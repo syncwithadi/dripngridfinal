@@ -15,10 +15,9 @@ interface PremiumBannerProps {
   bannerButton2Link?: string | null;
 }
 
-const SLIDES = [
-  '/images/newlandingpage%202.png',
-  '/images/new%20landing%20page%203.png',
-];
+// Images loaded dynamically from /public/images/landing/
+// Drop new images there — they auto-appear in alphabetical order
+const FALLBACK_SLIDES: string[] = [];
 
 const DURATION  = 5000;
 const RING_R    = 9;
@@ -38,16 +37,24 @@ export default function PremiumBanner({
   const headingRef = useRef<HTMLDivElement>(null);
   const dirRef     = useRef<'ltr' | 'rtl'>('ltr');
 
-  const images = bannerImage ? [bannerImage] : SLIDES;
+  const [dynamicSlides, setDynamicSlides] = useState<string[]>(FALLBACK_SLIDES);
+
+  // Fetch landing images from /api/landing-images (reads /public/images/landing/ dynamically)
+  useEffect(() => {
+    if (bannerImage) return;
+    fetch('/api/landing-images')
+      .then(r => r.json())
+      .then(({ images }) => { if (images?.length) setDynamicSlides(images); })
+      .catch(() => {});
+  }, [bannerImage]);
+
+  const images = bannerImage ? [bannerImage] : dynamicSlides;
 
   const [activeIdx,    setActiveIdx]    = useState(0);
   const [incomingIdx,  setIncomingIdx]  = useState<number | null>(null);
   const [wipeDir,      setWipeDir]      = useState<'ltr' | 'rtl'>('ltr');
   const [animating,    setAnimating]    = useState(false);
   const [ringKey,      setRingKey]      = useState(0);
-  // Lock banner height to window.innerHeight on mount so iOS Safari's dvh
-  // recalculation (when the address bar collapses on scroll) can't resize
-  // the container and cause the background image to appear to zoom.
   const [bannerHeight, setBannerHeight] = useState<string>('100dvh');
 
   const startTransition = (nextIdx: number, dir: 'ltr' | 'rtl') => {
@@ -137,7 +144,7 @@ export default function PremiumBanner({
       />
 
       {/* Desktop base image — hidden on mobile */}
-      <div className="absolute inset-0 z-0 hidden md:block" style={bg(images[activeIdx])} />
+      <div className="absolute inset-0 z-0 hidden md:block" style={bg(images[activeIdx] ?? '')} />
 
       {/* Desktop incoming image wipe — hidden on mobile */}
       {animating && incomingIdx !== null && (
@@ -179,7 +186,8 @@ export default function PremiumBanner({
       {/* CTA buttons */}
       <div
         ref={ctaRef}
-        className="absolute bottom-[18%] md:bottom-[12%] left-0 right-0 flex justify-center z-20"
+        className="absolute bottom-[10%] md:bottom-[12%] left-0 right-0 flex justify-center z-20"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Shop Now — centred, lower middle */}
@@ -189,26 +197,6 @@ export default function PremiumBanner({
         >
           SHOP NOW
         </Link>
-
-        {/* Shop Men / Shop Women — commented out for now */}
-        {/*
-        {bannerButton1Text && bannerButton1Link && (
-          <Link
-            href={bannerButton1Link}
-            className="px-4 py-2 md:px-6 md:py-3 bg-white/90 backdrop-blur-sm text-black text-[10px] md:text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl hover:bg-white transition-all duration-200 shadow-lg"
-          >
-            {bannerButton1Text}
-          </Link>
-        )}
-        {bannerButton2Text && bannerButton2Link && (
-          <Link
-            href={bannerButton2Link}
-            className="px-4 py-2 md:px-6 md:py-3 bg-white/60 backdrop-blur-sm border border-white/60 text-black text-[10px] md:text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl hover:bg-white/80 transition-all duration-200 shadow-lg"
-          >
-            {bannerButton2Text}
-          </Link>
-        )}
-        */}
       </div>
 
       {/* Timer dots */}

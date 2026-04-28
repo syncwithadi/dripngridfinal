@@ -81,7 +81,7 @@ export default function GenderBanner({
           <Link
             key={label}
             href={href}
-            className="group relative overflow-hidden cursor-pointer"
+            className={`group relative overflow-hidden cursor-pointer${label === 'SHOP MENS' ? ' border-r border-gray-200' : ''}`}
             style={{ flex: '1 1 50%', aspectRatio: '339.95/424.94' }}
           >
             {/* Background */}
@@ -111,10 +111,6 @@ export default function GenderBanner({
               </div>
             </div>
 
-            {/* Vertical divider */}
-            {label === 'SHOP MENS' && (
-              <div className="absolute right-0 top-0 bottom-0 w-px bg-white/10 z-10" />
-            )}
           </Link>
         ))}
       </section>
