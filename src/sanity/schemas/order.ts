@@ -138,6 +138,21 @@ export const orderSchema = {
       readOnly: true,
     },
     {
+      name: 'discountCode',
+      title: '🎟️ Coupon Code Used',
+      type: 'string',
+      group: 'items',
+      readOnly: true,
+    },
+    {
+      name: 'discountAmount',
+      title: 'Discount Applied (₹)',
+      type: 'number',
+      group: 'items',
+      initialValue: 0,
+      readOnly: true,
+    },
+    {
       name: 'shipping',
       title: 'Shipping Cost',
       type: 'number',

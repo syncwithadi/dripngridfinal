@@ -27,12 +27,14 @@ interface CreateOrderRequest {
     country: string;
   };
   paymentMethod?: string;
+  discountCode?: string;
+  discountAmount?: number;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: CreateOrderRequest = await request.json();
-    const { items, customer, shippingAddress, paymentMethod } = body;
+    const { items, customer, shippingAddress, paymentMethod, discountCode, discountAmount: rawDiscount } = body;
 
     // Validate request
     if (!items || items.length === 0) {
@@ -54,6 +56,9 @@ export async function POST(request: NextRequest) {
       return sum + item.priceINR * item.quantity;
     }, 0);
 
+    // Discount from coupon (validated on client before this call)
+    const discountAmount = Math.min(rawDiscount || 0, subtotal);
+
     // Shipping calculation (free above ₹1,500)
     const freeShippingThreshold = 1500;
     const shippingCost = 0; // Temporarily disabled for testing
@@ -62,7 +67,7 @@ export async function POST(request: NextRequest) {
     const taxRate = 0.18;
     const tax = Math.round(subtotal * taxRate);
 
-    const total = subtotal + shippingCost + tax;
+    const total = Math.max(0, subtotal - discountAmount + shippingCost + tax);
 
     // Generate SEQUENTIAL order number (DRIP-3001, DRIP-3002, etc.)
     const orderNumber = await getNextOrderNumber();
@@ -99,6 +104,8 @@ export async function POST(request: NextRequest) {
         priceINR: item.priceINR,
       })),
       subtotal,
+      ...(discountCode ? { discountCode: discountCode.toUpperCase().trim() } : {}),
+      ...(discountAmount > 0 ? { discountAmount } : {}),
       shipping: shippingCost,
       tax,
       total,
@@ -111,6 +118,39 @@ export async function POST(request: NextRequest) {
       shippingAddress,
       createdAt: new Date().toISOString(),
     });
+
+    // Track coupon usage — fire-and-forget, never blocks order
+    if (discountCode && discountAmount > 0) {
+      (async () => {
+        try {
+          const couponDoc = await sanityWriteClient.fetch(
+            `*[_type == "coupon" && code == $code][0]{ _id, usedCount, totalDiscountGiven, usages }`,
+            { code: discountCode.toUpperCase().trim() }
+          );
+          if (couponDoc?._id) {
+            const newUsage = {
+              _key:           `${orderNumber}-${Date.now()}`,
+              orderNumber,
+              customerEmail:  customer.email,
+              customerName:   customer.name,
+              discountAmount,
+              orderTotal:     total,
+              usedAt:         new Date().toISOString(),
+            };
+            await sanityWriteClient
+              .patch(couponDoc._id)
+              .set({
+                usedCount:          (couponDoc.usedCount || 0) + 1,
+                totalDiscountGiven: (couponDoc.totalDiscountGiven || 0) + discountAmount,
+              })
+              .append('usages', [newUsage])
+              .commit();
+          }
+        } catch (e) {
+          console.error('Failed to track coupon usage:', e);
+        }
+      })();
+    }
 
     // AUTO-SYNC: Update user profile with checkout data (fills empty fields)
     syncUserProfile(customer.email, {
@@ -201,7 +241,6 @@ export async function GET(request: NextRequest) {
 
     const result = await sanityWriteClient.fetch(query, params);
 
-    // When querying by email the result is an array; handle both cases
     const isEmpty = Array.isArray(result) ? result.length === 0 : !result;
     if (isEmpty) {
       return NextResponse.json(

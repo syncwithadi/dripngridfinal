@@ -50,8 +50,20 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
     const slide = (dir: 'prev' | 'next') => {
         const t = trackRef.current;
         if (!t) return;
-        t.scrollBy({ left: dir === 'next' ? 220 : -220, behavior: 'smooth' });
-        setTimeout(updateArrows, 400);
+        const atEnd = t.scrollLeft >= t.scrollWidth - t.clientWidth - 2;
+        const atStart = t.scrollLeft <= 2;
+        if (dir === 'next' && atEnd) {
+            // Loop: jump instantly to start (no animation), then settle
+            t.scrollLeft = 0;
+            setTimeout(updateArrows, 50);
+        } else if (dir === 'prev' && atStart) {
+            // Loop: jump instantly to end
+            t.scrollLeft = t.scrollWidth - t.clientWidth;
+            setTimeout(updateArrows, 50);
+        } else {
+            t.scrollBy({ left: dir === 'next' ? 220 : -220, behavior: 'smooth' });
+            setTimeout(updateArrows, 400);
+        }
     };
 
     // Toggle body class to hide navbar + lock scroll when fullscreen video is open
@@ -77,27 +89,35 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
                     <p className="text-sm text-gray-400 hidden md:block">Tag @dripngrid to get featured.</p>
                 </div>
 
-                {/* Video row */}
+                {/* Video row — outer wrapper handles arrow placement */}
                 <div className="relative"
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}>
 
-                    {/* Left arrow */}
+                    {/* Both arrows — always visible, loop at ends */}
                     <button
                         suppressHydrationWarning
                         onClick={() => slide('prev')}
                         aria-label="Previous"
-                        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
-                            ${hovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                            ${canPrev ? 'cursor-pointer' : 'opacity-30 cursor-default'}`}>
+                        className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                         </svg>
                     </button>
 
+                    <button
+                        suppressHydrationWarning
+                        onClick={() => slide('next')}
+                        aria-label="Next"
+                        className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+
                     <div ref={trackRef}
-                        className="flex gap-3 overflow-x-auto pb-2"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        className="flex gap-3 overflow-x-auto pb-2 mx-auto"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', maxWidth: '1272px' }}
                         onScroll={updateArrows}>
                         {VIDEO_SLOTS.map((slot) => (
                             <div key={slot.id}
@@ -119,8 +139,10 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
                                 {/* Handle */}
                                 <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
                                     <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="w-3 h-3 text-white" fill="currentColor">
+                                            <path d="M11 0H5a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5zm3.5 11c0 1.93-1.57 3.5-3.5 3.5H5c-1.93 0-3.5-1.57-3.5-3.5V5c0-1.93 1.57-3.5 3.5-3.5h6c1.93 0 3.5 1.57 3.5 3.5v6z"/>
+                                            <path d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6.5A2.503 2.503 0 0 1 5.5 8c0-1.379 1.122-2.5 2.5-2.5s2.5 1.121 2.5 2.5c0 1.378-1.122 2.5-2.5 2.5z"/>
+                                            <circle cx="12.3" cy="3.7" r=".533"/>
                                         </svg>
                                     </div>
                                     <span className="text-white text-[10px] font-medium">{slot.handle}</span>
@@ -135,19 +157,6 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
                             </div>
                         ))}
                     </div>
-
-                    {/* Right arrow */}
-                    <button
-                        suppressHydrationWarning
-                        onClick={() => slide('next')}
-                        aria-label="Next"
-                        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
-                            ${hovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                            ${canNext ? 'cursor-pointer' : 'opacity-30 cursor-default'}`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                        </svg>
-                    </button>
                 </div>
             </div>
 
@@ -195,8 +204,10 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
                             <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-4 pb-10 bg-gradient-to-b from-black/60 to-transparent">
                                 <p className="text-white text-xs font-semibold leading-snug line-clamp-2">Fresh racing inspired fits 🏎️ 🍊</p>
                                 <p className="text-white/60 text-[10px] mt-0.5 flex items-center gap-1">
-                                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="w-2.5 h-2.5" fill="currentColor">
+                                        <path d="M11 0H5a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5zm3.5 11c0 1.93-1.57 3.5-3.5 3.5H5c-1.93 0-3.5-1.57-3.5-3.5V5c0-1.93 1.57-3.5 3.5-3.5h6c1.93 0 3.5 1.57 3.5 3.5v6z"/>
+                                        <path d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6.5A2.503 2.503 0 0 1 5.5 8c0-1.379 1.122-2.5 2.5-2.5s2.5 1.121 2.5 2.5c0 1.378-1.122 2.5-2.5 2.5z"/>
+                                        <circle cx="12.3" cy="3.7" r=".533"/>
                                     </svg>
                                     @dripngrid
                                 </p>
@@ -308,8 +319,10 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
                 {/* Handle */}
                 <div className="absolute top-3 left-3 z-20 flex items-center gap-1">
                     <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="w-2.5 h-2.5 text-white" fill="currentColor">
+                            <path d="M11 0H5a5 5 0 0 0-5 5v6a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5zm3.5 11c0 1.93-1.57 3.5-3.5 3.5H5c-1.93 0-3.5-1.57-3.5-3.5V5c0-1.93 1.57-3.5 3.5-3.5h6c1.93 0 3.5 1.57 3.5 3.5v6z"/>
+                            <path d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6.5A2.503 2.503 0 0 1 5.5 8c0-1.379 1.122-2.5 2.5-2.5s2.5 1.121 2.5 2.5c0 1.378-1.122 2.5-2.5 2.5z"/>
+                            <circle cx="12.3" cy="3.7" r=".533"/>
                         </svg>
                     </div>
                     <span className="text-white text-[9px] font-medium">@dripngrid</span>
