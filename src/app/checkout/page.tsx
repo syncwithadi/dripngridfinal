@@ -268,7 +268,7 @@ function CheckoutContent() {
       {/* ── Minimal checkout header ─────────────────────────────── */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <div className="w-8" /> {/* spacer */}
-        <Link href="/" className="font-['var(--font-luxury)',serif] italic text-2xl font-semibold text-black tracking-tight">
+        <Link href="/" className="text-sm tracking-[0.14em] uppercase text-black select-none" style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}>
           DRIPNGRID
         </Link>
         <Link href="/checkout" className="text-gray-500 hover:text-black transition-colors">

@@ -535,7 +535,7 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
         <div className="flex items-center justify-between px-5 h-14 border-b border-gray-100">
           <span
             className="text-2xl tracking-[0.14em] uppercase text-black select-none"
-            style={{ fontFamily: 'var(--font-luxury), var(--font-serif), serif', fontStyle: 'italic', fontWeight: 500 }}
+            style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}
           >
             DRIPNGRID
           </span>
