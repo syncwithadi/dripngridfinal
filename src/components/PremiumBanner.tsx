@@ -104,7 +104,7 @@ export default function PremiumBanner({
 
   return (
     <div
-      className="relative w-full h-screen overflow-hidden -mt-[96px] cursor-pointer"
+      className="relative w-full h-[100dvh] overflow-hidden -mt-[96px] cursor-pointer"
       onClick={() => router.push('/new-arrivals')}
     >
       <style>{`
@@ -165,7 +165,7 @@ export default function PremiumBanner({
       {/* CTA buttons */}
       <div
         ref={ctaRef}
-        className="absolute bottom-[12%] left-0 right-0 flex justify-center z-20"
+        className="absolute bottom-[18%] md:bottom-[12%] left-0 right-0 flex justify-center z-20"
         onClick={e => e.stopPropagation()}
       >
         {/* Shop Now — centred, lower middle */}
