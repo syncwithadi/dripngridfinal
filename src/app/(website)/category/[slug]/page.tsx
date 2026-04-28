@@ -2,8 +2,8 @@ import { sanityClient } from '@/sanity/client';
 import { productsByCategoryQuery } from '@/sanity/queries';
 import CategoryContent from './CategoryContent';
 
-// Disable caching to ensure fresh data from Sanity on every request
-export const revalidate = 0;
+// Revalidate every 60 seconds for improved SEO performance
+export const revalidate = 60;
 
 // Update type definition for Next.js 15+
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {

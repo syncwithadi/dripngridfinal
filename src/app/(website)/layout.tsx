@@ -81,8 +81,54 @@ export default async function RootLayout({
     // Silently fall back to text wordmark if Sanity is unavailable
   }
 
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://dripngrid.in/#organization',
+        name: 'DRIPNGRID',
+        url: 'https://dripngrid.in',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://dripngrid.in/images/logo.png',
+          width: 300,
+          height: 100,
+        },
+        sameAs: [
+          'https://instagram.com/dripngrid',
+          'https://x.com/dripngrid',
+          'https://pinterest.com/dripngrid',
+        ],
+        contactPoint: {
+          '@type': 'ContactPoint',
+          email: 'support@dripngrid.in',
+          contactType: 'customer service',
+        },
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://dripngrid.in/#website',
+        url: 'https://dripngrid.in',
+        name: 'DRIPNGRID',
+        publisher: { '@id': 'https://dripngrid.in/#organization' },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://dripngrid.in/search?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ],
+  };
+
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} ${outfit.variable} ${bodoni.variable} ${bebas.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+      </head>
       <body className="bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
         <ThemeProvider>
           <AuthProvider>

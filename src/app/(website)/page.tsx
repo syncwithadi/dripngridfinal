@@ -3,8 +3,8 @@ import { newArrivalsQuery, bestSellersQuery, allCategoriesQuery, heroImagesQuery
 import HomeContent from './HomeContent';
 import { urlFor } from '@/sanity/image';
 
-// Disable caching to ensure fresh data from Sanity on every request
-export const revalidate = 0;
+// Revalidate every 5 minutes for improved SEO performance
+export const revalidate = 300;
 
 export default async function Home() {
   // Fetch all data from Sanity in parallel

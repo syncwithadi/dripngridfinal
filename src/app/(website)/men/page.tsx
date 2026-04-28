@@ -4,7 +4,7 @@ import GenderPageContent from '@/components/GenderPageContent';
 import { urlFor } from '@/sanity/image';
 
 // Disable caching to ensure fresh data
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function MenPage() {
     const productsRaw = await sanityClient.fetch(productsByGenderQuery, { gender: 'Men' });

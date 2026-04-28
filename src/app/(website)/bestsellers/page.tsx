@@ -2,7 +2,7 @@ import { sanityClient } from '@/sanity/client';
 import GenderPageContent from '@/components/GenderPageContent';
 import { urlFor } from '@/sanity/image';
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 const bestsellersPageQuery = `*[_type == "product" && isHidden != true] | order(salesCount desc, _createdAt desc) {
   _id, name, slug, priceINR, originalPriceINR,

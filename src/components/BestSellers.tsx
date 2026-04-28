@@ -68,6 +68,8 @@ export default function BestSellers({ products, onQuickView }: BestSellersProps)
   }, [products, cardWidth]);
 
   useEffect(() => {
+    // Skip ScrollTrigger on mobile — reduces scroll calculation overhead
+    if (window.innerWidth < 768) return;
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
         y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',

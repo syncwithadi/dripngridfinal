@@ -40,11 +40,15 @@ export default function PremiumBanner({
 
   const images = bannerImage ? [bannerImage] : SLIDES;
 
-  const [activeIdx,   setActiveIdx]   = useState(0);
-  const [incomingIdx, setIncomingIdx] = useState<number | null>(null);
-  const [wipeDir,     setWipeDir]     = useState<'ltr' | 'rtl'>('ltr');
-  const [animating,   setAnimating]   = useState(false);
-  const [ringKey,     setRingKey]     = useState(0);
+  const [activeIdx,    setActiveIdx]    = useState(0);
+  const [incomingIdx,  setIncomingIdx]  = useState<number | null>(null);
+  const [wipeDir,      setWipeDir]      = useState<'ltr' | 'rtl'>('ltr');
+  const [animating,    setAnimating]    = useState(false);
+  const [ringKey,      setRingKey]      = useState(0);
+  // Lock banner height to window.innerHeight on mount so iOS Safari's dvh
+  // recalculation (when the address bar collapses on scroll) can't resize
+  // the container and cause the background image to appear to zoom.
+  const [bannerHeight, setBannerHeight] = useState<string>('100dvh');
 
   const startTransition = (nextIdx: number, dir: 'ltr' | 'rtl') => {
     if (animating || nextIdx === activeIdx) return;
@@ -84,6 +88,9 @@ export default function PremiumBanner({
   };
 
   useEffect(() => {
+    // Lock height once so iOS Safari dvh resize on scroll doesn't zoom the image
+    setBannerHeight(`${window.innerHeight}px`);
+
     const ctx = gsap.context(() => {
       const targets = [headingRef.current, ctaRef.current].filter(Boolean);
       gsap.set(targets, { opacity: 0, y: 20 });
@@ -104,7 +111,8 @@ export default function PremiumBanner({
 
   return (
     <div
-      className="relative w-full h-[100dvh] overflow-hidden -mt-[96px] cursor-pointer"
+      className="relative w-full overflow-hidden -mt-[96px] cursor-pointer"
+      style={{ height: bannerHeight }}
       onClick={() => router.push('/new-arrivals')}
     >
       <style>{`

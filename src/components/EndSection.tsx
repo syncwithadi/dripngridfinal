@@ -10,9 +10,19 @@ export default function EndSection() {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setShowBackToTop(window.scrollY > 500);
+    let rafId: number | null = null;
+    const handleScroll = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        setShowBackToTop(window.scrollY > 500);
+        rafId = null;
+      });
+    };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });

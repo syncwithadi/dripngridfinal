@@ -3,8 +3,8 @@ import { productsByGenderQuery } from '@/sanity/queries';
 import GenderPageContent from '@/components/GenderPageContent';
 import { urlFor } from '@/sanity/image';
 
-// Disable caching to ensure fresh data
-export const revalidate = 0;
+// Revalidate every 60 seconds for improved SEO performance
+export const revalidate = 60;
 
 export default async function WomenPage() {
     const productsRaw = await sanityClient.fetch(productsByGenderQuery, { gender: 'Women' });

@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /account
+Disallow: /account/login
+Disallow: /account/signup
+Disallow: /checkout
+Disallow: /orders
+Disallow: /order-confirmation
+Disallow: /track-order
+Disallow: /wishlist
+Disallow: /api/
+
+Sitemap: https://dripngrid.in/sitemap.xml

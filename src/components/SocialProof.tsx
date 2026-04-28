@@ -57,7 +57,9 @@ export default function SocialProof({ testimonials }: SocialProofProps) {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    // Skip ScrollTrigger on mobile — reduces scroll calculation overhead
+    const isMobile = window.innerWidth < 768;
+    const ctx = isMobile ? null : gsap.context(() => {
       gsap.from(titleRef.current, {
         y: 60,
         opacity: 0,
@@ -77,7 +79,7 @@ export default function SocialProof({ testimonials }: SocialProofProps) {
     }, 5000);
 
     return () => {
-      ctx.revert();
+      ctx?.revert();
       clearInterval(interval);
     };
   }, [items.length]);

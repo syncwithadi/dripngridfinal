@@ -13,6 +13,8 @@ export default function BrandStory() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Skip ScrollTrigger on mobile — reduces scroll calculation overhead
+    if (window.innerWidth < 768) return;
     const ctx = gsap.context(() => {
       gsap.from(imageRef.current, {
         clipPath: 'inset(100% 0 0 0)',

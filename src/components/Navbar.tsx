@@ -115,9 +115,19 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
 
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    let rafId: number | null = null;
+    const handleScroll = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 20);
+        rafId = null;
+      });
+    };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   useEffect(() => {
@@ -197,7 +207,7 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
       {/* ── MAIN HEADER ─────────────────────────────────────────────────────── */}
       <header
         ref={megaRef}
-        className={`w-full relative z-50 transition-all duration-500 ${headerBg}`}
+        className={`w-full relative z-50 transition-[background-color,border-color,box-shadow] duration-300 ${headerBg}`}
         onMouseLeave={closeMenu}
       >
         <nav className="max-w-[1400px] mx-auto px-5 md:px-8">
