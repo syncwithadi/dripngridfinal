@@ -141,13 +141,18 @@ export default function ShopPage() {
     }
 
     return (
-        <div className="container-custom py-24 min-h-[70vh]">
+        <div className="container-custom pt-6 pb-16 min-h-[70vh]">
             {/* Header */}
-            <div className="text-center mb-12">
-                <h1 className="text-display-md mb-4">Shop All</h1>
-                <p className="text-[var(--color-text-muted)] max-w-lg mx-auto">
-                    Explore our complete collection of premium streetwear.
-                </p>
+            <div className="mb-8 pb-5 border-b border-gray-100">
+                <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-1">Collection</p>
+                <div className="flex items-end justify-between">
+                    <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-tight text-gray-800">
+                        Shop All
+                    </h1>
+                    <p className="text-sm text-gray-400 hidden md:block">
+                        Explore our complete collection
+                    </p>
+                </div>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-8">

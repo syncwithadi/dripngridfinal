@@ -1,11 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface Category {
   name: string;
@@ -18,141 +14,88 @@ interface CategoriesProps {
   categories: Category[];
 }
 
-// Fallback images for categories without images in Sanity
-const fallbackImages: Record<string, string> = {
-  hoodies: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80',
-  tees: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80',
-  jackets: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80',
-  bottoms: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&q=80',
-  denim: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&q=80',
+// Local collection images — mapped by category slug
+const localImages: Record<string, string> = {
+  hoodies: '/images/collection/hoodies.png',
+  jackets: '/images/collection/jacket collection.png',
+  jacket: '/images/collection/jacket collection.png',
+  bottoms: '/images/collection/jeans collection.png',
+  jeans: '/images/collection/jeans collection.png',
+  denim: '/images/collection/jeans collection.png',
+  tees: '/images/collection/tshirt collection.png',
+  tshirts: '/images/collection/tshirt collection.png',
+  't-shirts': '/images/collection/tshirt collection.png',
 };
 
+// Unsplash fallback for any unlisted slug
+const fallbackImage = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80';
+
 export default function Categories({ categories }: CategoriesProps) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
+  if (!categories || categories.length === 0) return null;
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Title animation
-      gsap.from(titleRef.current, {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        ease: 'power4.out',
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse',
-        },
-      });
-
-      // Cards stagger animation
-      const cards = cardsRef.current?.children;
-      if (cards) {
-        gsap.from(cards, {
-          y: 100,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: 'power4.out',
-          scrollTrigger: {
-            trigger: cardsRef.current,
-            start: 'top 75%',
-            toggleActions: 'play none none reverse',
-          },
-        });
-      }
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  // If no categories from Sanity, show nothing
-  if (!categories || categories.length === 0) {
-    return null;
-  }
+  // Show max 4 panels
+  const panels = categories.slice(0, 4);
 
   return (
-    <section
-      ref={sectionRef}
-      id="categories"
-      className="section-padding bg-[var(--color-bg-secondary)]"
-    >
-      <div className="container-custom">
-        {/* Section Header */}
-        <div ref={titleRef} className="text-center mb-12 md:mb-16">
-          <span className="text-label text-[var(--color-text-muted)] mb-4 block tracking-widest">
-            Shop By Category
-          </span>
-          <h2 className="text-display-md text-[var(--color-text)]">
-            Collections
-          </h2>
-        </div>
+    <section id="categories" className="w-full flex">
+      {panels.map((category, i) => {
+        // Local image takes priority, then Sanity image, then generic fallback
+        const imageUrl =
+          localImages[category.slug.toLowerCase()] ||
+          localImages[category.name.toLowerCase()] ||
+          category.image ||
+          fallbackImage;
 
-        {/* Category Cards */}
-        <div
-          ref={cardsRef}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {categories.map((category) => {
-            const imageUrl = category.image || fallbackImages[category.slug] || fallbackImages.tees;
+        return (
+          <Link
+            key={category.slug}
+            href={`/category/${category.slug}`}
+            className="group relative overflow-hidden cursor-pointer"
+            style={{ flex: `1 1 ${100 / panels.length}%`, aspectRatio: '4/5' }}
+          >
+            {/* Background image */}
+            <div
+              className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105"
+              style={{
+                backgroundImage: `url('${imageUrl}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center top',
+                backgroundColor: '#1a1a1a',
+              }}
+            />
 
-            return (
-              <a
-                key={category.slug}
-                href={`/category/${category.slug}`}
-                className="group relative overflow-hidden aspect-[3/4] rounded-2xl"
+            {/* Dark gradient — bottom heavy like GenderBanner */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/20 pointer-events-none" />
+
+            {/* Text + Explore button */}
+            <div className="absolute bottom-10 left-8 z-10">
+              <h2 className="text-white text-2xl md:text-3xl font-black tracking-wider uppercase mb-4 drop-shadow-lg">
+                {category.name}
+              </h2>
+              <div
+                className="inline-flex items-center gap-2 px-5 py-2.5
+                  border border-white text-white text-xs font-semibold tracking-[0.2em] uppercase rounded-xl
+                  group-hover:bg-white group-hover:text-black
+                  transition-all duration-300"
               >
-                {/* Background Image */}
-                <Image
-                  src={imageUrl}
-                  alt={category.name}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out-expo group-hover:scale-110"
-                />
+                Explore
+                <svg
+                  className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                </svg>
+              </div>
+            </div>
 
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
-
-                {/* Content */}
-                <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  {/* Category Name */}
-                  <h3 className="text-display-sm text-white mb-2 group-hover:translate-x-2 transition-transform duration-500">
-                    {category.name}
-                  </h3>
-
-                  {/* Product Count */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-white/70">
-                      {category.count} Products
-                    </span>
-                    <span className="w-10 h-10 flex items-center justify-center border border-white/30 text-white group-hover:border-white group-hover:bg-white group-hover:text-black transition-all duration-300">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                        className="w-5 h-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                        />
-                      </svg>
-                    </span>
-                  </div>
-
-                  {/* Hover Line */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                </div>
-              </a>
-            );
-          })}
-        </div>
-      </div>
+            {/* Vertical divider between panels (not on last) */}
+            {i < panels.length - 1 && (
+              <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white/20 z-10" />
+            )}
+          </Link>
+        );
+      })}
     </section>
   );
 }

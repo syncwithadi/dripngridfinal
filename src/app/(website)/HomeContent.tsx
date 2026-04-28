@@ -12,6 +12,8 @@ import SocialProof from '@/components/SocialProof';
 import Newsletter from '@/components/Newsletter';
 import FeatureBanner from '@/components/FeatureBanner';
 import EndSection from '@/components/EndSection';
+import GenderBanner from '@/components/GenderBanner';
+import GenderSection from '@/components/GenderSection';
 import QuickViewModal from '@/components/QuickViewModal';
 
 interface HeroImage {
@@ -57,6 +59,8 @@ interface BannerData {
 interface HomeContentProps {
   newArrivals: any[];
   bestSellers: any[];
+  menProducts: any[];
+  womenProducts: any[];
   categories: Category[];
   heroImages: HeroImage[];
   lookbookImages: LookbookImage[];
@@ -68,6 +72,8 @@ interface HomeContentProps {
 export default function HomeContent({
   newArrivals,
   bestSellers,
+  menProducts,
+  womenProducts,
   categories,
   heroImages,
   lookbookImages,
@@ -104,6 +110,9 @@ export default function HomeContent({
       {/* New Arrivals */}
       <NewArrivals products={newArrivals} onQuickView={handleQuickView} />
 
+      {/* Shop Men / Women Banner */}
+      <GenderBanner />
+
       {/* Best Sellers */}
       <BestSellers products={bestSellers} onQuickView={handleQuickView} />
 
@@ -114,25 +123,28 @@ export default function HomeContent({
         showcaseButtonLink={banner?.showcaseButtonLink}
       />
 
+      {/* Shop Men — product carousel */}
+      <GenderSection gender="Men" products={menProducts} href="/men" onQuickView={handleQuickView} />
+
+      {/* Shop Women — product carousel */}
+      <GenderSection gender="Women" products={womenProducts} href="/women" onQuickView={handleQuickView} />
+
       {/* Categories */}
       <Categories categories={categories} />
 
       {/* Lookbook — hidden for now, re-enable when ready */}
       {/* <Lookbook lookbookImages={lookbookImages} /> */}
 
-      {/* Divider / Separation */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent opacity-50 my-16 md:my-24" />
+      {/* Divider */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent opacity-50 my-8 md:my-12" />
 
       {/* Newsletter */}
       <Newsletter />
 
       {/* Feature Banner */}
-      <div className="mb-24">
-        <FeatureBanner featuredImages={lookbookImages} />
-      </div>
+      <FeatureBanner featuredImages={lookbookImages} />
 
-      {/* Spacing for visual separation */}
-      <div className="h-24 md:h-32" />
+
 
       {/* End Section */}
       <EndSection />

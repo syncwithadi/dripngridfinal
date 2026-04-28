@@ -53,7 +53,7 @@ export default function Lookbook({ lookbookImages }: LookbookProps) {
   return (
     <section id="lookbook" className="py-24 bg-[var(--color-bg)] overflow-hidden">
       <div className="container-wide mb-12 text-center">
-        <h2 className="text-3xl md:text-5xl font-light tracking-wide text-[var(--color-text)] uppercase mb-4">
+        <h2 className="text-xl md:text-2xl font-bold tracking-widest uppercase text-gray-600 mb-4">
           Lookbook
         </h2>
         <p className="text-[var(--color-text-muted)] max-w-lg mx-auto mb-12">

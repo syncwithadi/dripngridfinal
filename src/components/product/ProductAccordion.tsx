@@ -50,7 +50,7 @@ interface ProductAccordionProps {
 export default function ProductAccordion({ description, material }: ProductAccordionProps) {
     return (
         <div className="border-t border-[var(--color-border)] mt-10">
-            <AccordionItem title="Description" defaultOpen>
+            <AccordionItem title="Description">
                 <p className="whitespace-pre-line">{description || "No description available."}</p>
             </AccordionItem>
 

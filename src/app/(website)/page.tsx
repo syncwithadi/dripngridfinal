@@ -1,5 +1,5 @@
 import { sanityClient } from '@/sanity/client';
-import { newArrivalsQuery, bestSellersQuery, allCategoriesQuery, heroImagesQuery, lookbookQuery, testimonialsQuery, philosophyQuery, bannerQuery } from '@/sanity/queries';
+import { newArrivalsQuery, bestSellersQuery, allCategoriesQuery, heroImagesQuery, lookbookQuery, testimonialsQuery, philosophyQuery, bannerQuery, productsByGenderQuery } from '@/sanity/queries';
 import HomeContent from './HomeContent';
 import { urlFor } from '@/sanity/image';
 
@@ -8,7 +8,7 @@ export const revalidate = 0;
 
 export default async function Home() {
   // Fetch all data from Sanity in parallel
-  const [newArrivalsRaw, bestSellersRaw, categoriesRaw, heroImagesRaw, lookbookRaw, testimonialsRaw, philosophyRaw, bannerRaw] = await Promise.all([
+  const [newArrivalsRaw, bestSellersRaw, categoriesRaw, heroImagesRaw, lookbookRaw, testimonialsRaw, philosophyRaw, bannerRaw, menProductsRaw, womenProductsRaw] = await Promise.all([
     sanityClient.fetch(newArrivalsQuery),
     sanityClient.fetch(bestSellersQuery),
     sanityClient.fetch(allCategoriesQuery),
@@ -17,6 +17,8 @@ export default async function Home() {
     sanityClient.fetch(testimonialsQuery),
     sanityClient.fetch(philosophyQuery),
     sanityClient.fetch(bannerQuery),
+    sanityClient.fetch(productsByGenderQuery, { gender: 'Men' }),
+    sanityClient.fetch(productsByGenderQuery, { gender: 'Women' }),
   ]);
 
   const mapProduct = (p: any) => ({
@@ -28,6 +30,8 @@ export default async function Home() {
 
   const newArrivals = newArrivalsRaw?.map(mapProduct) || [];
   const bestSellers = bestSellersRaw?.map(mapProduct) || [];
+  const menProducts = menProductsRaw?.map(mapProduct) || [];
+  const womenProducts = womenProductsRaw?.map(mapProduct) || [];
 
   // Map categories with image URLs
   const categories = (categoriesRaw || []).map((cat: any) => ({
@@ -64,6 +68,8 @@ export default async function Home() {
     <HomeContent
       newArrivals={newArrivals}
       bestSellers={bestSellers}
+      menProducts={menProducts}
+      womenProducts={womenProducts}
       categories={categories}
       heroImages={heroImages}
       lookbookImages={lookbookImages}

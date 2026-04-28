@@ -12,6 +12,9 @@ export default function MaintenanceBanner() {
     return () => clearTimeout(t);
   }, []);
 
+  // ── Commented out: remove this line to re-enable the maintenance banner ──
+  return null;
+
   if (!visible) return null;
 
   return (

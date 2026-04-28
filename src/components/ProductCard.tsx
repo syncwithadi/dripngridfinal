@@ -13,6 +13,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onQuickView }: ProductCardProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -23,6 +24,27 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
 
   const isWishlisted = mounted ? isInWishlist(product.id) : false;
   const isSoldOut = product.badge === 'sold-out' || !product.inStock;
+
+  // Build all available images in order
+  const imgKeys = ['front', 'back', 'left', 'right', 'detail'] as const;
+  const allImages = imgKeys
+    .map(k => urlFor((product.images as any)?.[k])?.width(800).url() || null)
+    .filter((u): u is string => Boolean(u));
+
+  const slug = typeof product.slug === 'string' ? product.slug : product.slug?.current || '';
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (allImages.length <= 1) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width; // 0 to 1
+    const idx = Math.min(Math.floor(x * allImages.length), allImages.length - 1);
+    setActiveIndex(idx);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setActiveIndex(0);
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -56,53 +78,46 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
     });
   };
 
-  const frontImageUrl = urlFor(product.images?.front)?.width(800).url();
-  const backImageUrl = urlFor(product.images?.back)?.width(800).url();
-  const slug = typeof product.slug === 'string' ? product.slug : product.slug?.current || '';
-
   return (
     <Link href={`/product/${slug}`} className="block group">
-      <div
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* ── IMAGE ────────────────────────────────────────────── */}
-        <div className="relative overflow-hidden bg-[#f4f3f0] aspect-[4/5] w-full mb-3 rounded-2xl">
-
-          {/* Front image */}
-          {frontImageUrl && (
+      <div>
+        {/* ── IMAGE ── */}
+        <div
+          className="relative overflow-hidden bg-[#f4f3f0] aspect-[4/5] w-full mb-3 rounded-2xl"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          {/* All images stacked — only active one visible */}
+          {allImages.map((imgUrl, i) => (
             <Image
-              src={frontImageUrl}
-              alt={product.name}
+              key={i}
+              src={imgUrl}
+              alt={`${product.name} – view ${i + 1}`}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              className={`object-cover transition-all duration-700 ease-out ${isHovered && backImageUrl ? 'opacity-0 scale-[1.03]' : 'opacity-100 scale-100'
-                }`}
-              priority
+              className={`object-cover transition-opacity duration-300 ${
+                i === activeIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+              priority={i === 0}
             />
-          )}
+          ))}
 
-          {/* Back image on hover */}
-          {backImageUrl && (
-            <Image
-              src={backImageUrl}
-              alt={`${product.name} - back`}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              className={`object-cover transition-all duration-700 ease-out ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.03]'
-                }`}
-            />
+          {/* Fallback if no images */}
+          {allImages.length === 0 && (
+            <div className="absolute inset-0 bg-[#f4f3f0]" />
           )}
 
           {/* Badge */}
           {product.badge && (
-            <div className={`absolute top-3 left-3 text-[9px] font-semibold tracking-[0.15em] uppercase px-2.5 py-1 rounded-md ${product.badge === 'sold-out' ? 'bg-black/60 text-white' : 'bg-black text-white'
-              }`}>
+            <div className={`absolute top-3 left-3 text-[9px] font-semibold tracking-[0.15em] uppercase px-2.5 py-1 rounded-md ${
+              product.badge === 'sold-out' ? 'bg-black/60 text-white' : 'bg-black text-white'
+            }`}>
               {product.badge === 'sold-out' ? 'Sold Out' : product.badge}
             </div>
           )}
 
-          {/* Bookmark — top right, always visible */}
+          {/* Wishlist button */}
           <button
             suppressHydrationWarning
             onClick={handleWishlist}
@@ -115,23 +130,26 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
             </svg>
           </button>
 
-          {/* Dot indicators — bottom center */}
-          {backImageUrl && (
-            <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1 pointer-events-none">
-              <span className={`block w-1.5 h-1.5 rounded-full transition-all duration-300 ${isHovered ? 'bg-white/50' : 'bg-white/90'}`} />
-              <span className={`block w-1.5 h-1.5 rounded-full transition-all duration-300 ${isHovered ? 'bg-white/90' : 'bg-white/50'}`} />
+          {/* Image progress indicators — bottom */}
+          {allImages.length > 1 && isHovered && (
+            <div className="absolute bottom-0 left-0 right-0 flex pointer-events-none">
+              {allImages.map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-[2px] transition-all duration-150"
+                  style={{ background: i === activeIndex ? '#fff' : 'rgba(255,255,255,0.35)' }}
+                />
+              ))}
             </div>
           )}
         </div>
 
-        {/* ── PRODUCT INFO ─────────────────────────────────────── */}
+        {/* ── PRODUCT INFO ── */}
         <div className="px-0.5">
-          {/* Name */}
           <h3 className="text-[13px] font-normal tracking-wide text-black leading-snug mb-1">
             {product.name}
           </h3>
 
-          {/* Price row — price on left, + button on far right */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 flex-wrap flex-1">
               <span className="text-[13px] font-medium text-black">
@@ -149,18 +167,12 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
               )}
             </div>
 
-            {/* + icon only — no background circle */}
             <button
               suppressHydrationWarning
               onClick={handleAddToCart}
               disabled={isSoldOut || addingToCart}
               className={`flex-shrink-0 flex items-center justify-center transition-all duration-200 p-0.5
-                ${isSoldOut
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : addingToCart
-                    ? 'text-black scale-95'
-                    : 'text-gray-400 hover:text-black hover:scale-110'
-                }`}
+                ${isSoldOut ? 'text-gray-300 cursor-not-allowed' : addingToCart ? 'text-black scale-95' : 'text-gray-400 hover:text-black hover:scale-110'}`}
               aria-label={isSoldOut ? 'Sold out' : 'Add to bag'}
             >
               {addingToCart ? (
@@ -174,8 +186,6 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
               )}
             </button>
           </div>
-
-          {/* Colour dots — hidden */}
         </div>
       </div>
     </Link>

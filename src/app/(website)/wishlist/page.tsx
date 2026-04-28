@@ -78,13 +78,13 @@ export default function WishlistPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div className="container-custom section-padding">
+      <div className="container-custom pt-6 pb-16">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-display-md text-[var(--color-text)] mb-4">Wishlist</h1>
-          <p className="text-[var(--color-text-muted)]">
-            {items.length} {items.length === 1 ? 'item' : 'items'}
-          </p>
+        <div className="mb-8 pb-5 border-b border-gray-100">
+          <div className="flex items-end justify-between">
+            <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-tight text-gray-800">Wishlist</h1>
+            <p className="text-sm text-gray-400">{items.length} {items.length === 1 ? 'item' : 'items'}</p>
+          </div>
         </div>
 
         {/* Empty State */}
@@ -138,7 +138,7 @@ export default function WishlistPage() {
                   {/* Info */}
                   <div className="p-4">
                     <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-                      {item.category}
+                      {typeof item.category === 'string' ? item.category : (item.category as any)?.name || ''}
                     </p>
                     <h3 className="text-sm font-normal text-[var(--color-text)] mb-2">
                       {item.name}

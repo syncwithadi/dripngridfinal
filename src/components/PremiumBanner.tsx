@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 
 interface PremiumBannerProps {
@@ -19,6 +20,10 @@ const SLIDES = [
   '/images/new%20landing%20page%203.png',
 ];
 
+const DURATION  = 5000;
+const RING_R    = 9;
+const RING_CIRC = 2 * Math.PI * RING_R;
+
 export default function PremiumBanner({
   bannerImage,
   bannerHeading,
@@ -28,93 +33,109 @@ export default function PremiumBanner({
   bannerButton2Text = 'Shop Women',
   bannerButton2Link = '/women',
 }: PremiumBannerProps) {
-  const ctaRef = useRef<HTMLDivElement>(null);
+  const router     = useRouter();
+  const ctaRef     = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
+  const dirRef     = useRef<'ltr' | 'rtl'>('ltr');
 
   const images = bannerImage ? [bannerImage] : SLIDES;
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [prevIdx, setPrevIdx] = useState<number | null>(null);
-  const [fading, setFading] = useState(false);
 
-  // Auto-advance every 3s
+  const [activeIdx,   setActiveIdx]   = useState(0);
+  const [incomingIdx, setIncomingIdx] = useState<number | null>(null);
+  const [wipeDir,     setWipeDir]     = useState<'ltr' | 'rtl'>('ltr');
+  const [animating,   setAnimating]   = useState(false);
+  const [ringKey,     setRingKey]     = useState(0);
+
+  const startTransition = (nextIdx: number, dir: 'ltr' | 'rtl') => {
+    if (animating || nextIdx === activeIdx) return;
+    dirRef.current = dir === 'ltr' ? 'rtl' : 'ltr';
+    setWipeDir(dir);
+    setIncomingIdx(nextIdx);
+    setAnimating(true);
+  };
+
   useEffect(() => {
     if (images.length < 2) return;
-    const t = setTimeout(() => {
-      setPrevIdx(activeIdx);
-      setActiveIdx((activeIdx + 1) % images.length);
-      setFading(true);
-    }, 3000);
-    return () => clearTimeout(t);
+    const t = setInterval(() => {
+      const dir = dirRef.current;
+      dirRef.current = dir === 'ltr' ? 'rtl' : 'ltr';
+      const next = (activeIdx + 1) % images.length;
+      setWipeDir(dir);
+      setIncomingIdx(next);
+      setAnimating(true);
+    }, DURATION);
+    return () => clearInterval(t);
   }, [activeIdx, images.length]);
 
-  // Clear fade state after transition completes
   useEffect(() => {
-    if (!fading) return;
+    if (!animating || incomingIdx === null) return;
     const t = setTimeout(() => {
-      setFading(false);
-      setPrevIdx(null);
-    }, 1600);
+      setActiveIdx(incomingIdx);
+      setIncomingIdx(null);
+      setAnimating(false);
+      setRingKey(k => k + 1);
+    }, 1300);
     return () => clearTimeout(t);
-  }, [fading]);
+  }, [animating, incomingIdx]);
 
-  // GSAP intro for CTA / heading
+  const goToSlide = (idx: number) => {
+    const dir: 'ltr' | 'rtl' = idx > activeIdx ? 'ltr' : 'rtl';
+    startTransition(idx, dir);
+  };
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       const targets = [headingRef.current, ctaRef.current].filter(Boolean);
       gsap.set(targets, { opacity: 0, y: 20 });
-      gsap.to(targets, {
-        opacity: 1,
-        y: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-        delay: 0.5,
-        stagger: 0.15,
-      });
+      gsap.to(targets, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.5, stagger: 0.15 });
     });
     return () => ctx.revert();
   }, []);
 
-  return (
-    <div className="relative w-full h-screen overflow-hidden -mt-[96px]">
+  const bg = (src: string): React.CSSProperties => ({
+    backgroundImage:    `url('${src}')`,
+    backgroundSize:     '100% 100%',
+    backgroundPosition: 'center',
+    backgroundRepeat:   'no-repeat',
+  });
 
-      {/* Previous image — fades out with subtle zoom */}
-      {fading && prevIdx !== null && (
+  const wipeAnim = wipeDir === 'ltr' ? 'wipeRevealLTR' : 'wipeRevealRTL';
+  const visibleIdx = animating && incomingIdx !== null ? incomingIdx : activeIdx;
+
+  return (
+    <div
+      className="relative w-full h-screen overflow-hidden -mt-[96px] cursor-pointer"
+      onClick={() => router.push('/new-arrivals')}
+    >
+      <style>{`
+        @keyframes wipeRevealLTR {
+          from { clip-path: inset(0 100% 0 0); }
+          to   { clip-path: inset(0 0%   0 0); }
+        }
+        @keyframes wipeRevealRTL {
+          from { clip-path: inset(0 0 0 100%); }
+          to   { clip-path: inset(0 0 0 0%);   }
+        }
+        @keyframes ringTimer {
+          from { stroke-dashoffset: ${RING_CIRC}; }
+          to   { stroke-dashoffset: 0; }
+        }
+      `}</style>
+
+      {/* Base image */}
+      <div className="absolute inset-0 z-0" style={bg(images[activeIdx])} />
+
+      {/* Incoming image wipe */}
+      {animating && incomingIdx !== null && (
         <div
+          key={incomingIdx}
           className="absolute inset-0"
           style={{
-            backgroundImage: `url('${images[prevIdx]}')`,
-            backgroundSize: '100% 100%',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            animation: 'fadeZoomOut 1.6s ease-in-out forwards',
+            ...bg(images[incomingIdx]),
+            animation: `${wipeAnim} 1.2s ease-in-out forwards`,
           }}
         />
       )}
-
-      {/* Active image — fades in with subtle zoom */}
-      <div
-        key={activeIdx}
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url('${images[activeIdx]}')`,
-          backgroundSize: '100% 100%',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          animation: fading ? 'fadeZoomIn 1.6s ease-in-out forwards' : 'none',
-        }}
-      />
-
-      {/* Keyframe styles */}
-      <style>{`
-        @keyframes fadeZoomIn {
-          0%   { opacity: 0; transform: scale(1.04); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes fadeZoomOut {
-          0%   { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(0.97); }
-        }
-      `}</style>
 
       {/* Top gradient */}
       <div
@@ -141,10 +162,11 @@ export default function PremiumBanner({
         </div>
       )}
 
-      {/* Bottom-left CTA */}
+      {/* CTA buttons */}
       <div
         ref={ctaRef}
-        className="absolute bottom-[30%] md:bottom-[18%] left-6 md:left-10 z-10 flex flex-col sm:flex-row items-start sm:items-center gap-3"
+        className="absolute bottom-[30%] md:bottom-[18%] left-6 md:left-10 z-20 flex flex-col sm:flex-row items-start sm:items-center gap-3"
+        onClick={e => e.stopPropagation()}
       >
         {bannerButton1Text && bannerButton1Link && (
           <Link
@@ -164,17 +186,45 @@ export default function PremiumBanner({
         )}
       </div>
 
-      {/* Dot indicators */}
+      {/* Timer dots */}
       {images.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          {images.map((_, i) => (
-            <div
-              key={i}
-              className={`h-[2px] rounded-full transition-all duration-700 ${
-                i === activeIdx ? 'w-8 bg-white' : 'w-3 bg-white/35'
-              }`}
-            />
-          ))}
+        <div
+          className="absolute bottom-7 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
+          onClick={e => e.stopPropagation()}
+        >
+          {images.map((_, i) => {
+            const isActive = i === visibleIdx;
+            return (
+              <button
+                key={i}
+                onClick={() => goToSlide(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className="flex items-center justify-center w-6 h-6 cursor-pointer"
+              >
+                {isActive ? (
+                  <svg width="20" height="20" viewBox="0 0 20 20" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="10" cy="10" r={RING_R} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
+                    <circle
+                      key={ringKey}
+                      cx="10" cy="10" r={RING_R}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeDasharray={RING_CIRC}
+                      strokeDashoffset={RING_CIRC}
+                      style={{ animation: `ringTimer ${DURATION}ms linear forwards` }}
+                    />
+                    <circle cx="10" cy="10" r="2.5" fill="white" style={{ transform: 'rotate(90deg)', transformOrigin: '10px 10px' }} />
+                  </svg>
+                ) : (
+                  <svg width="8" height="8" viewBox="0 0 8 8">
+                    <circle cx="4" cy="4" r="3.5" fill="rgba(255,255,255,0.45)" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

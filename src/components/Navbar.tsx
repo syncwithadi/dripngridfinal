@@ -1,49 +1,82 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 
-// ── Mega-menu data ────────────────────────────────────────────────────────────
-const megaMenu = {
-  collections: [
-    { label: 'New Arrivals', href: '/new-arrivals' },
-    { label: 'Bestsellers', href: '/bestsellers' },
-    { label: "Men's Edit", href: '/men' },
-    { label: "Women's Edit", href: '/women' },
-    { label: 'Lookbook', href: '/lookbook' },
-  ],
-  categories: [
-    {
-      heading: 'Top',
-      items: [
-        { label: 'T-Shirts', href: '/shop?cat=tshirts' },
-        { label: 'Hoodies', href: '/shop?cat=hoodies' },
-        { label: 'Sweatshirts', href: '/shop?cat=sweatshirts' },
-        { label: 'Shirts', href: '/shop?cat=shirts' },
-        { label: 'Jackets', href: '/shop?cat=jackets' },
-      ],
-    },
-    {
-      heading: 'Bottom',
-      items: [
-        { label: 'Cargos', href: '/shop?cat=cargos' },
-        { label: 'Jeans', href: '/shop?cat=jeans' },
-        { label: 'Shorts', href: '/shop?cat=shorts' },
-        { label: 'Track Pants', href: '/shop?cat=trackpants' },
-      ],
-    },
-    {
-      heading: 'Accessories',
-      items: [
-        { label: 'Caps', href: '/shop?cat=caps' },
-        { label: 'Bags', href: '/shop?cat=bags' },
-      ],
-    },
-  ],
+// ── Dropdown data ─────────────────────────────────────────────────────────────
+const genderMenus = {
+  men: {
+    featured: [
+      { label: 'New Arrivals', href: '/new-arrivals' },
+      { label: 'Bestsellers',  href: '/bestsellers'  },
+      { label: 'All Men\'s',   href: '/men'           },
+    ],
+    categories: [
+      {
+        heading: 'Tops',
+        items: [
+          { label: 'T-Shirts',    href: '/shop?cat=tshirts'    },
+          { label: 'Hoodies',     href: '/shop?cat=hoodies'    },
+          { label: 'Sweatshirts', href: '/shop?cat=sweatshirts' },
+          { label: 'Shirts',      href: '/shop?cat=shirts'     },
+          { label: 'Jackets',     href: '/shop?cat=jackets'    },
+        ],
+      },
+      {
+        heading: 'Bottoms',
+        items: [
+          { label: 'Cargos',      href: '/shop?cat=cargos'     },
+          { label: 'Jeans',       href: '/shop?cat=jeans'      },
+          { label: 'Shorts',      href: '/shop?cat=shorts'     },
+          { label: 'Track Pants', href: '/shop?cat=trackpants' },
+        ],
+      },
+      {
+        heading: 'Accessories',
+        items: [
+          { label: 'Caps', href: '/shop?cat=caps' },
+          { label: 'Bags', href: '/shop?cat=bags' },
+        ],
+      },
+    ],
+  },
+  women: {
+    featured: [
+      { label: 'New Arrivals',  href: '/new-arrivals' },
+      { label: 'Bestsellers',   href: '/bestsellers'  },
+      { label: 'All Women\'s',  href: '/women'         },
+    ],
+    categories: [
+      {
+        heading: 'Tops',
+        items: [
+          { label: 'T-Shirts',    href: '/shop?cat=tshirts'    },
+          { label: 'Hoodies',     href: '/shop?cat=hoodies'    },
+          { label: 'Sweatshirts', href: '/shop?cat=sweatshirts' },
+          { label: 'Crop Tops',   href: '/shop?cat=croptops'   },
+        ],
+      },
+      {
+        heading: 'Bottoms',
+        items: [
+          { label: 'Jeans',   href: '/shop?cat=jeans'   },
+          { label: 'Shorts',  href: '/shop?cat=shorts'  },
+          { label: 'Skirts',  href: '/shop?cat=skirts'  },
+        ],
+      },
+      {
+        heading: 'Accessories',
+        items: [
+          { label: 'Bags', href: '/shop?cat=bags' },
+          { label: 'Caps', href: '/shop?cat=caps' },
+        ],
+      },
+    ],
+  },
 };
 
 interface NavbarProps {
@@ -55,11 +88,14 @@ interface NavbarProps {
 export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) {
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMegaOpen, setIsMegaOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<'men' | 'women' | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   // If the logo image fails to load (broken URL, CDN error, etc.) fall back to text wordmark
   const [logoLoadError, setLogoLoadError] = useState(false);
 
@@ -93,6 +129,28 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
     if (isSearchOpen) setTimeout(() => searchInputRef.current?.focus(), 80);
   }, [isSearchOpen]);
 
+  // Live search — debounced 250ms
+  useEffect(() => {
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setSearchLoading(true);
+    searchDebounce.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        const data = await res.json();
+        setSearchResults(data);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 250);
+    return () => { if (searchDebounce.current) clearTimeout(searchDebounce.current); };
+  }, [searchQuery]);
+
   const handleLogoClick = (e: React.MouseEvent) => {
     if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
@@ -106,7 +164,7 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
     }
   };
 
-  const closeMega = () => setIsMegaOpen(false)
+  const closeMenu = () => setOpenMenu(null);
 
   const openDrawer = () => {
     if (drawerCloseTimer.current) clearTimeout(drawerCloseTimer.current)
@@ -140,51 +198,72 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
       <header
         ref={megaRef}
         className={`w-full relative z-50 transition-all duration-500 ${headerBg}`}
-        onMouseLeave={() => setIsMegaOpen(false)}
+        onMouseLeave={closeMenu}
       >
         <nav className="max-w-[1400px] mx-auto px-5 md:px-8">
           <div className="relative flex items-center justify-between h-14 md:h-[60px] gap-4">
 
             {/* ── LEFT NAV ────────────────────────────────────── */}
             <div className="hidden lg:flex items-center gap-7 min-w-[200px]">
-              <Link
-                href="/new-arrivals"
-                className={`text-[13px] font-medium transition-colors ${navText}`}
-                onClick={closeMega}
-              >
+
+              {/* New In */}
+              <Link href="/new-arrivals" className={`text-[13px] font-medium transition-colors ${navText}`}>
                 New In
               </Link>
 
-              {/* Collections — hover opens mega menu */}
-              <div
-                className="relative"
-                onMouseEnter={() => setIsMegaOpen(true)}
-              >
-                <Link
-                  href="/shop"
-                  className={`text-[13px] font-medium transition-colors flex items-center gap-1 ${navText}`}
-                  onClick={closeMega}
-                >
+              {/* Collections */}
+              <div className="relative" onMouseEnter={() => setOpenMenu('men')} onMouseLeave={closeMenu}>
+                <button className={`text-[13px] font-medium transition-colors flex items-center gap-1 ${navText}`}>
                   Collections
-                  {/* tiny chevron indicator */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className={`w-3 h-3 transition-transform duration-200 ${isMegaOpen ? 'rotate-180' : ''}`}
-                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
+                    className={`w-3 h-3 transition-transform duration-200 ${openMenu === 'men' ? 'rotate-180' : ''}`}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                   </svg>
-                </Link>
+                </button>
+
+                {/* Collections dropdown */}
+                <div className={`absolute top-full left-0 pt-3 transition-all duration-200 z-50
+                  ${openMenu === 'men' ? 'opacity-100 pointer-events-auto translate-y-0' : 'opacity-0 pointer-events-none -translate-y-1'}`}>
+                  <div className="bg-white border border-gray-100 shadow-lg rounded-xl p-5 w-[520px] flex gap-6">
+                    {/* Men's */}
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-400 mb-3">Men&apos;s</p>
+                      <div className="flex flex-col gap-2.5">
+                        <Link href="/men" onClick={closeMenu} className="text-sm text-gray-700 hover:text-black font-medium transition-colors">All Men&apos;s</Link>
+                        {genderMenus.men.categories.flatMap(c => c.items).map(item => (
+                          <Link key={item.href} href={item.href} onClick={closeMenu}
+                            className="text-xs text-gray-600 hover:text-black transition-colors">{item.label}</Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="w-px bg-gray-100 self-stretch" />
+                    {/* Women's */}
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-400 mb-3">Women&apos;s</p>
+                      <div className="flex flex-col gap-2.5">
+                        <Link href="/women" onClick={closeMenu} className="text-sm text-gray-700 hover:text-black font-medium transition-colors">All Women&apos;s</Link>
+                        {genderMenus.women.categories.flatMap(c => c.items).map(item => (
+                          <Link key={item.href} href={item.href} onClick={closeMenu}
+                            className="text-xs text-gray-600 hover:text-black transition-colors">{item.label}</Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="w-px bg-gray-100 self-stretch" />
+                    {/* Featured */}
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-400 mb-3">Featured</p>
+                      <div className="flex flex-col gap-2.5">
+                        <Link href="/new-arrivals" onClick={closeMenu} className="text-sm text-gray-700 hover:text-black font-medium transition-colors">New Arrivals</Link>
+                        <Link href="/bestsellers" onClick={closeMenu} className="text-sm text-gray-700 hover:text-black font-medium transition-colors">Bestsellers</Link>
+                        <Link href="/lookbook" onClick={closeMenu} className="text-sm text-gray-700 hover:text-black font-medium transition-colors">Lookbook</Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <Link
-                href="/track-order"
-                className={`text-[13px] font-medium transition-colors ${navText}`}
-                onClick={closeMega}
-              >
+              {/* Track Order */}
+              <Link href="/track-order" className={`text-[13px] font-medium transition-colors ${navText}`} onClick={closeMenu}>
                 Track Order
               </Link>
             </div>
@@ -228,27 +307,77 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
 
               {/* Search */}
               {isSearchOpen ? (
-                <form onSubmit={handleSearchSubmit} className={`flex items-center border-b mr-1 ${borderCol}`}>
-                  <input
-                    suppressHydrationWarning
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Search…"
-                    className={`w-28 md:w-44 bg-transparent text-sm outline-none py-1 px-1 placeholder:text-current/40 ${logoColor}`}
-                  />
-                  <button type="submit" className={`p-1.5 transition-opacity hover:opacity-60 ${iconColor}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                  </button>
-                  <button type="button" onClick={() => setIsSearchOpen(false)} className={`p-1.5 transition-opacity hover:opacity-60 ${iconColor}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </form>
+                <div className="relative mr-1">
+                  <form onSubmit={handleSearchSubmit} className={`flex items-center border-b ${borderCol}`}>
+                    <input
+                      suppressHydrationWarning
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder="Search products…"
+                      className={`w-36 md:w-52 bg-transparent text-sm outline-none py-1 px-1 placeholder:text-current/40 ${logoColor}`}
+                    />
+                    <button type="submit" className={`p-1.5 transition-opacity hover:opacity-60 ${iconColor}`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                      </svg>
+                    </button>
+                    <button type="button" onClick={() => { setIsSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}
+                      className={`p-1.5 transition-opacity hover:opacity-60 ${iconColor}`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </form>
+
+                  {/* Live results dropdown */}
+                  {(searchResults.length > 0 || searchLoading) && searchQuery.trim().length >= 2 && (
+                    <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden z-[999]">
+                      {searchLoading ? (
+                        <div className="px-4 py-3 text-xs text-gray-400">Searching…</div>
+                      ) : (
+                        <>
+                          <div className="max-h-80 overflow-y-auto">
+                            {searchResults.map(p => (
+                              <Link
+                                key={p._id}
+                                href={`/product/${p.slug?.current || p.slug}`}
+                                onClick={() => { setIsSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}
+                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                              >
+                                {/* Thumbnail */}
+                                <div className="w-10 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
+                                  {p.image && (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                                  )}
+                                </div>
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                                  <p className="text-xs text-gray-500 mt-0.5">₹{p.priceINR?.toLocaleString('en-IN')}</p>
+                                </div>
+                                {p.badge && (
+                                  <span className="text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 bg-black text-white rounded">
+                                    {p.badge}
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </div>
+                          {/* View all results */}
+                          <button
+                            onClick={handleSearchSubmit as any}
+                            className="w-full px-4 py-2.5 text-xs font-semibold text-center text-gray-600 hover:text-black hover:bg-gray-50 transition-colors border-t border-gray-100"
+                          >
+                            See all results for "{searchQuery}"
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <button onClick={() => setIsSearchOpen(true)} className={`p-2 transition-colors ${iconColor}`} aria-label="Search">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-[18px] h-[18px]">
@@ -308,67 +437,6 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
           </div>
         </nav>
 
-        {/* ── MEGA MENU DROPDOWN ─────────────────────────────────────────────── */}
-        <div
-          className={`hidden lg:block absolute top-full left-0 right-0 bg-white border-t border-gray-100 shadow-lg transition-all duration-300 overflow-hidden ${isMegaOpen ? 'max-h-[480px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-            }`}
-        >
-          <div className="max-w-[1400px] mx-auto px-8 py-8">
-            <div className="flex gap-14">
-              {/* Collections column */}
-              <div className="min-w-[150px]">
-                <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-400 mb-4">Collections</p>
-                <div className="flex flex-col gap-3">
-                  {megaMenu.collections.map(c => (
-                    <Link
-                      key={c.href}
-                      href={c.href}
-                      onClick={closeMega}
-                      className="text-sm text-gray-700 hover:text-black font-medium transition-colors"
-                    >
-                      {c.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div className="w-px bg-gray-100 self-stretch" />
-
-              {/* Category sections */}
-              <div className="flex gap-12 flex-1">
-                {megaMenu.categories.map(cat => (
-                  <div key={cat.heading}>
-                    <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-400 mb-4">
-                      {cat.heading}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {cat.items.map(item => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={closeMega}
-                          className="px-3 py-1.5 bg-gray-100 hover:bg-black hover:text-white text-gray-700 text-xs font-medium rounded-full transition-colors"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Close */}
-              <button
-                onClick={closeMega}
-                className="self-start p-1.5 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
       </header>
 
       {/* ── NAV DRAWER (desktop) ────────────────────────────────────────────── */}
@@ -440,7 +508,7 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
               </span>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
                 className="w-3 h-3 flex-shrink-0 text-white/20 group-hover:text-white/50 transition-colors">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
               </svg>
             </Link>
           ))}
@@ -461,7 +529,6 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
           >
             DRIPNGRID
           </span>
-          {/* Close button — mirrors the hamburger to keep spacing consistent */}
           <button
             onClick={() => setIsMobileOpen(false)}
             className="flex flex-col justify-center gap-[5px] w-9 h-9"
@@ -473,14 +540,13 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-0.5">
           {[
-            { href: '/new-arrivals', label: 'New In' },
-            { href: '/shop', label: 'Collections' },
-            { href: '/track-order', label: 'Track Order' },
-            { href: '/men', label: "Men's Edit" },
-            { href: '/women', label: "Women's Edit" },
-            { href: '/bestsellers', label: 'Bestsellers' },
-            { href: '/lookbook', label: 'Lookbook' },
-            { href: '/journal', label: 'Journal' },
+            { href: '/men',          label: 'Shop Men'    },
+            { href: '/women',        label: 'Shop Women'  },
+            { href: '/track-order',  label: 'Track Order' },
+            { href: '/new-arrivals', label: 'New Arrivals'},
+            { href: '/bestsellers',  label: 'Bestsellers' },
+            { href: '/lookbook',     label: 'Lookbook'    },
+            { href: '/journal',      label: 'Journal'     },
           ].map(link => (
             <Link key={link.href} href={link.href} onClick={() => setIsMobileOpen(false)}
               className="flex items-center justify-between py-4 border-b border-gray-100 text-base font-medium text-gray-800 hover:text-black">
@@ -493,7 +559,7 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
           <div className="pt-4">
             <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-400 mb-4">Shop by category</p>
             <div className="flex flex-wrap gap-2">
-              {megaMenu.categories.flatMap(c => c.items).map(item => (
+              {genderMenus.men.categories.flatMap(c => c.items).map(item => (
                 <Link key={item.href} href={item.href} onClick={() => setIsMobileOpen(false)}
                   className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-full hover:bg-black hover:text-white transition-colors">
                   {item.label}

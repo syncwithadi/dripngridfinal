@@ -26,7 +26,7 @@ export default function CategoryContent({ products, categoryName }: CategoryCont
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div className="container-custom section-padding">
+      <div className="container-custom pt-6 pb-16">
         {/* Breadcrumb */}
         <nav className="mb-8 text-sm text-[var(--color-text-muted)]">
           <Link href="/" className="hover:text-[var(--color-text)] transition-colors">
@@ -37,11 +37,12 @@ export default function CategoryContent({ products, categoryName }: CategoryCont
         </nav>
 
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-display-md text-[var(--color-text)] mb-4 capitalize">{categoryName}</h1>
-          <p className="text-[var(--color-text-muted)]">
-            {products.length} {products.length === 1 ? 'product' : 'products'}
-          </p>
+        <div className="mb-8 pb-5 border-b border-gray-100">
+          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-1">Category</p>
+          <div className="flex items-end justify-between">
+            <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-tight text-gray-800 capitalize">{categoryName}</h1>
+            <p className="text-sm text-gray-400 hidden md:block">{products.length} {products.length === 1 ? 'product' : 'products'}</p>
+          </div>
         </div>
 
         {/* Products Grid */}

@@ -47,16 +47,16 @@ export default function VisualShowcase({
             <div className="absolute inset-0 z-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                    src={showcaseImage || 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?q=80&w=2070&auto=format&fit=crop'}
+                    src="/images/view collection poster.png"
                     alt="Visual Showcase"
-                    className="object-cover w-full h-full opacity-60"
+                    className="object-cover w-full h-full opacity-80"
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 pointer-events-none" />
             </div>
 
             {/* Single glassmorphism CTA */}
-            <div ref={textRef} className="relative z-10 flex items-center justify-center">
+            <div ref={textRef} className="relative z-10 flex items-center justify-center" style={{ marginTop: "30vh" }}>
                 <a
                     href={showcaseButtonLink || '/shop'}
                     className="group inline-flex items-center gap-3

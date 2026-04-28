@@ -11,6 +11,7 @@ import { CurrencyProvider } from '@/context/CurrencyContext';
 import AuthProvider from '@/context/AuthProvider';
 import { sanityClient } from '@/sanity/client';
 import { siteSettingsQuery } from '@/sanity/queries';
+import TabTitleEffect from '@/components/TabTitleEffect';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -87,7 +88,7 @@ export default async function RootLayout({
           <AuthProvider>
             <CurrencyProvider>
               {/* Fixed Header Wrapper */}
-              <div className="fixed top-0 left-0 right-0 z-[500]">
+              <div id="site-header" className="fixed top-0 left-0 right-0 z-[500]">
                 <PromoRibbon />
                 <Navbar
                   brandLogo={siteSettings.brandLogo}
@@ -95,6 +96,9 @@ export default async function RootLayout({
                   siteName={siteSettings.siteName}
                 />
               </div>
+
+              {/* Tab title cycling when user switches away */}
+              <TabTitleEffect />
 
               {/* Cart Drawer */}
               <CartDrawer />

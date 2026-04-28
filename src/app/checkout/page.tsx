@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useCartStore } from '@/store/cartStore';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -40,11 +40,34 @@ const INDIAN_STATES = [
 const inputCls =
   'w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400 bg-white transition-colors';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const { items, getSubtotal, clearCart } = useCartStore();
+  const { items: cartItems, getSubtotal, clearCart } = useCartStore();
   const { formatPrice } = useCurrency();
+
+  // Buy Now mode — item comes from URL params, never touches cart
+  const isBuyNow = searchParams.get('buyNow') === 'true';
+  const buyNowItem = useMemo(() => {
+    if (!isBuyNow) return null;
+    const price = Number(searchParams.get('price') || 0);
+    return {
+      id: 'buynow-' + Date.now(),
+      productId: searchParams.get('productId') || '',
+      name: searchParams.get('name') || '',
+      slug: searchParams.get('slug') || '',
+      priceINR: price,
+      size: searchParams.get('size') || 'One Size',
+      color: searchParams.get('color') || 'Default',
+      quantity: Number(searchParams.get('quantity') || 1),
+      image: searchParams.get('image') || '',
+    };
+  }, [isBuyNow, searchParams]);
+
+  // Use buyNow item or cart items
+  const items = isBuyNow && buyNowItem ? [buyNowItem] : cartItems;
+  const getSubtotalValue = () => items.reduce((sum, i) => sum + i.priceINR * i.quantity, 0);
 
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,10 +124,11 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     // Only redirect after hydration — avoids false-empty cart on first render
-    if (mounted && items.length === 0 && !orderingSuccess) router.push('/');
-  }, [mounted, items, router, orderingSuccess]);
+    // Don't redirect if in buyNow mode
+    if (mounted && !isBuyNow && cartItems.length === 0 && !orderingSuccess) router.push('/');
+  }, [mounted, isBuyNow, cartItems, router, orderingSuccess]);
 
-  const subtotal = getSubtotal();
+  const subtotal = getSubtotalValue();
   const shippingCost = 0;
   const total = subtotal + shippingCost;
 
@@ -234,9 +258,10 @@ export default function CheckoutPage() {
     }
   };
 
-  // Show nothing until hydrated (avoids flash + premature redirect)
+  // Show nothing until hydrated
   if (!mounted) return null;
-  if (items.length === 0) return null;
+  // Redirect if no items (cart empty and not buyNow)
+  if (!isBuyNow && cartItems.length === 0) return null;
 
   return (
     <>
@@ -560,5 +585,17 @@ export default function CheckoutPage() {
         }}
       />
     </>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 }

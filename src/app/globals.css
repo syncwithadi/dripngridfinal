@@ -708,3 +708,14 @@
     letter-spacing: 0.1em;
   }
 }
+
+/* ========================================
+   Video Lightbox — hide navbar
+   ======================================== */
+body.video-open {
+  overflow: hidden;
+}
+
+body.video-open #site-header {
+  display: none !important;
+}
