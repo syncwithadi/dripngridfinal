@@ -23,7 +23,7 @@ export async function generateMetadata(
         ? `${product.description.slice(0, 155)}...`
         : `Buy ${product.name} at DRIPNGRID. Premium streetwear, drip so sharp it cuts.`;
     const imageUrl = product.images?.front
-        ? urlFor(product.images.front)?.width(1200).height(630).url()
+        ? urlFor(product.images.front)?.url()
         : 'https://dripngrid.in/images/og-default.jpg';
     const canonicalUrl = `https://dripngrid.in/product/${slug}`;
 
