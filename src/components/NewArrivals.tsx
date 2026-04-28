@@ -76,11 +76,11 @@ export default function NewArrivals({ products, onQuickView }: NewArrivalsProps)
   if (!products || products.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className="py-16 md:py-24 container-custom">
+    <section ref={sectionRef} className="py-6 md:py-10 container-custom">
       <div ref={headerRef} className="flex items-end justify-between mb-8">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-1">New In</p>
-          <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-tight text-gray-800">New Arrivals</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-800">New Arrivals</h2>
         </div>
         <Link href="/new-arrivals" className="text-[11px] font-semibold tracking-[0.15em] uppercase underline underline-offset-4 opacity-60 hover:opacity-100 transition-opacity">
           View All

@@ -74,8 +74,8 @@ export default function Footer() {
           <div>
             <Link href="/" className="inline-block mb-6">
               <span
-                className="text-4xl font-black tracking-tight leading-none uppercase whitespace-nowrap"
-                style={{ fontFamily: 'var(--font-bebas), var(--font-display), sans-serif' }}
+                className="tracking-tight leading-none uppercase whitespace-nowrap"
+                style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal', fontSize: '0.95rem' }}
               >
                 DRIPNGRID
               </span>

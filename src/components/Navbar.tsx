@@ -293,8 +293,8 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
                   />
                 ) : (
                   <span
-                    className={`text-[22px] md:text-[26px] font-black tracking-[0.12em] uppercase select-none transition-colors duration-500 ${logoColor}`}
-                    style={{ fontFamily: 'var(--font-display), sans-serif' }}
+                    className={`text-[22px] md:text-[26px] tracking-[0.12em] uppercase select-none transition-colors duration-500 ${logoColor}`}
+                    style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}
                   >
                     {siteName || 'DRIPNGRID'}
                   </span>

@@ -94,8 +94,8 @@ export default function PremiumBanner({
 
   const bg = (src: string): React.CSSProperties => ({
     backgroundImage:    `url('${src}')`,
-    backgroundSize:     '100% 100%',
-    backgroundPosition: 'center',
+    backgroundSize:     'cover',
+    backgroundPosition: 'center center',
     backgroundRepeat:   'no-repeat',
   });
 
@@ -165,13 +165,23 @@ export default function PremiumBanner({
       {/* CTA buttons */}
       <div
         ref={ctaRef}
-        className="absolute bottom-[30%] md:bottom-[18%] left-6 md:left-10 z-20 flex flex-col sm:flex-row items-start sm:items-center gap-3"
+        className="absolute bottom-[12%] left-0 right-0 flex justify-center z-20"
         onClick={e => e.stopPropagation()}
       >
+        {/* Shop Now — centred, lower middle */}
+        <Link
+          href="/shop"
+          className="px-7 py-2.5 bg-white text-black text-[11px] font-semibold tracking-[0.2em] uppercase rounded-lg shadow-md hover:bg-white/90 transition-all duration-200 whitespace-nowrap"
+        >
+          SHOP NOW
+        </Link>
+
+        {/* Shop Men / Shop Women — commented out for now */}
+        {/*
         {bannerButton1Text && bannerButton1Link && (
           <Link
             href={bannerButton1Link}
-            className="px-6 py-3 bg-white/90 backdrop-blur-sm text-black text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl hover:bg-white transition-all duration-200 shadow-lg"
+            className="px-4 py-2 md:px-6 md:py-3 bg-white/90 backdrop-blur-sm text-black text-[10px] md:text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl hover:bg-white transition-all duration-200 shadow-lg"
           >
             {bannerButton1Text}
           </Link>
@@ -179,11 +189,12 @@ export default function PremiumBanner({
         {bannerButton2Text && bannerButton2Link && (
           <Link
             href={bannerButton2Link}
-            className="px-6 py-3 bg-white/60 backdrop-blur-sm border border-white/60 text-black text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl hover:bg-white/80 transition-all duration-200 shadow-lg"
+            className="px-4 py-2 md:px-6 md:py-3 bg-white/60 backdrop-blur-sm border border-white/60 text-black text-[10px] md:text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl hover:bg-white/80 transition-all duration-200 shadow-lg"
           >
             {bannerButton2Text}
           </Link>
         )}
+        */}
       </div>
 
       {/* Timer dots */}

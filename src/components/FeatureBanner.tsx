@@ -84,9 +84,10 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
 
                     {/* Left arrow */}
                     <button
+                        suppressHydrationWarning
                         onClick={() => slide('prev')}
                         aria-label="Previous"
-                        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
                             ${hovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                             ${canPrev ? 'cursor-pointer' : 'opacity-30 cursor-default'}`}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
@@ -137,9 +138,10 @@ export default function FeatureBanner({ featuredImages = [] }: FeatureBannerProp
 
                     {/* Right arrow */}
                     <button
+                        suppressHydrationWarning
                         onClick={() => slide('next')}
                         aria-label="Next"
-                        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
+                        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
                             ${hovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                             ${canNext ? 'cursor-pointer' : 'opacity-30 cursor-default'}`}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">

@@ -27,56 +27,98 @@ export default function GenderBanner({
   ];
 
   return (
-    <section className="w-full flex">
-      {panels.map(({ label, href, image, placeholder }) => (
-        <Link
-          key={label}
-          href={href}
-          className="group relative overflow-hidden cursor-pointer"
-          style={{ flex: '1 1 50%', aspectRatio: '339.95/424.94' }}
-        >
-          {/* Background */}
-          <div
-            className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105"
+    <>
+      {/* ── MOBILE: horizontal scroll with peek ───────────────────────── */}
+      <section
+        className="md:hidden w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth
+          [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        style={{ paddingRight: '10vw' }}
+      >
+        {panels.map(({ label, href, image, placeholder }) => (
+          <Link
+            key={label}
+            href={href}
+            className="relative overflow-hidden flex-shrink-0 snap-start"
             style={{
-              backgroundColor: placeholder,
-              backgroundImage: image ? `url('${image}')` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center top',
+              width: '88vw',
+              aspectRatio: '3/4',
+              marginRight: '8px',
+              WebkitTapHighlightColor: 'transparent',
             }}
-          />
-
-          {/* Dark gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/20 pointer-events-none" />
-
-          {/* Text + button */}
-          <div className="absolute bottom-10 left-8 z-10">
-            <h2 className="text-white text-3xl md:text-4xl font-black tracking-wider uppercase mb-4 drop-shadow-lg">
-              {label}
-            </h2>
+          >
+            {/* Background */}
             <div
-              className="inline-flex items-center gap-2 px-5 py-2.5
-                border border-white text-white text-xs font-semibold tracking-[0.2em] uppercase
-                group-hover:bg-white group-hover:text-black
-                transition-all duration-300"
-            >
-              Explore
-              <svg
-                className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-              </svg>
-            </div>
-          </div>
+              className="absolute inset-0"
+              style={{
+                backgroundColor: placeholder,
+                backgroundImage: image ? `url('${image}')` : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center top',
+              }}
+            />
 
-          {/* Divider between panels */}
-          {label === 'SHOP MENS' && (
-            <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white/20 z-10" />
-          )}
-        </Link>
-      ))}
-    </section>
+            {/* Dark gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/20 pointer-events-none" />
+
+            {/* Text + button */}
+            <div className="absolute bottom-7 left-5 z-10">
+              <h2 className="text-white text-2xl font-black tracking-wide uppercase mb-3 drop-shadow-lg">
+                {label}
+              </h2>
+              <div
+                className="inline-flex items-center px-5 py-2
+                  border border-white text-white text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl"
+              >
+                EXPLORE
+              </div>
+            </div>
+          </Link>
+        ))}
+      </section>
+
+      {/* ── DESKTOP: classic 50/50 side-by-side ───────────────────────── */}
+      <section className="hidden md:flex w-full">
+        {panels.map(({ label, href, image, placeholder }) => (
+          <Link
+            key={label}
+            href={href}
+            className="group relative overflow-hidden cursor-pointer"
+            style={{ flex: '1 1 50%', aspectRatio: '339.95/424.94' }}
+          >
+            {/* Background */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundColor: placeholder,
+                backgroundImage: image ? `url('${image}')` : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center top',
+              }}
+            />
+
+            {/* Dark gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/20 pointer-events-none" />
+
+            {/* Text + button */}
+            <div className="absolute bottom-10 left-8 z-10">
+              <h2 className="text-white text-2xl font-black tracking-wide uppercase mb-3 drop-shadow-lg">
+                {label}
+              </h2>
+              <div
+                className="inline-flex items-center px-5 py-2
+                  border border-white text-white text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl"
+              >
+                EXPLORE
+              </div>
+            </div>
+
+            {/* Vertical divider */}
+            {label === 'SHOP MENS' && (
+              <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white/20 z-10" />
+            )}
+          </Link>
+        ))}
+      </section>
+    </>
   );
 }

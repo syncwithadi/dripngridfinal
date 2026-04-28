@@ -2,11 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ProductCard from './ProductCard';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const GAP          = 24;
 const VISIBLE      = 4;
@@ -20,8 +16,6 @@ interface GenderSectionProps {
 }
 
 export default function GenderSection({ gender, products, href, onQuickView }: GenderSectionProps) {
-  const sectionRef   = useRef<HTMLDivElement>(null);
-  const headerRef    = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef     = useRef<HTMLDivElement>(null);
 
@@ -64,15 +58,6 @@ export default function GenderSection({ gender, products, href, onQuickView }: G
     return () => t?.removeEventListener('scroll', updateArrows);
   }, [products, cardWidth]);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(headerRef.current, {
-        y: 30, opacity: 0, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: headerRef.current, start: 'top 88%', toggleActions: 'play none none reverse' },
-      });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, []);
 
   const ArrowBtn = ({ dir }: { dir: 'prev' | 'next' }) => {
     const canSlide = dir === 'prev' ? canPrev : canNext;
@@ -96,25 +81,23 @@ export default function GenderSection({ gender, products, href, onQuickView }: G
   };
 
   return (
-    <section ref={sectionRef} className="py-8 md:py-12 bg-white">
+    <section className="py-6 md:py-10 bg-white">
       <div className="container-custom">
 
         {/* Header */}
-        <div ref={headerRef} className="mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-tight text-gray-800 mb-1">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold tracking-tight text-gray-900 mb-1">
             Shop {gender}
           </h2>
-          <div className="flex items-center justify-between mt-1">
-            <p className="text-sm text-gray-400">
-              {gender === 'Men' ? 'Uncover the latest in men\'s fashion' : 'From everyday essentials to statement pieces'}
-            </p>
-            <Link
-              href={href}
-              className="text-[11px] font-semibold tracking-[0.15em] uppercase underline underline-offset-4 opacity-60 hover:opacity-100 transition-opacity"
-            >
-              Shop {gender}
-            </Link>
-          </div>
+          <p className="text-sm text-gray-400 mb-3">
+            {gender === 'Men' ? 'Uncover the latest in men\'s fashion' : 'From everyday essentials to statement pieces'}
+          </p>
+          <Link
+            href={href}
+            className="text-sm font-semibold text-gray-900 underline underline-offset-4 decoration-1 hover:opacity-70 transition-opacity"
+          >
+            Shop {gender}
+          </Link>
         </div>
 
         {/* Empty state — shown while no products are in this category */}

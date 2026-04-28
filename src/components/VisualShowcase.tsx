@@ -49,33 +49,18 @@ export default function VisualShowcase({
                 <img
                     src="/images/view collection poster.png"
                     alt="Visual Showcase"
-                    className="object-cover w-full h-full opacity-80"
+                    className="object-cover w-full h-full"
                 />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 pointer-events-none" />
             </div>
 
             {/* Single glassmorphism CTA */}
             <div ref={textRef} className="relative z-10 flex items-center justify-center" style={{ marginTop: "30vh" }}>
                 <a
                     href={showcaseButtonLink || '/shop'}
-                    className="group inline-flex items-center gap-3
-                               px-9 py-4 rounded-2xl
-                               bg-white/10 backdrop-blur-md
-                               border border-white/25
-                               text-white text-[11px] font-semibold tracking-[0.22em] uppercase
-                               hover:bg-white/20 hover:border-white/45
-                               active:scale-[0.97]
-                               transition-all duration-300 ease-out
-                               shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+                    className="inline-flex items-center px-6 py-2.5
+                               border border-white text-white text-[11px] font-semibold tracking-[0.18em] uppercase rounded-xl"
                 >
                     {showcaseButtonText || 'View Collection'}
-                    <svg
-                        className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-                    </svg>
                 </a>
             </div>
         </section>

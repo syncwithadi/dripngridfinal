@@ -8,9 +8,9 @@ import ProductCard from './ProductCard';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const GAP     = 24;
-const VISIBLE = 4;
-const VISIBLE_MOBILE = 2;
+const GAP          = 24;
+const VISIBLE      = 4;
+const VISIBLE_MOB  = 2;
 
 interface BestSellersProps {
   products: any[];
@@ -31,7 +31,7 @@ export default function BestSellers({ products, onQuickView }: BestSellersProps)
   const computeCardWidth = useCallback(() => {
     if (!containerRef.current) return;
     const isMobile = window.innerWidth < 768;
-    const vis = isMobile ? VISIBLE_MOBILE : VISIBLE;
+    const vis = isMobile ? VISIBLE_MOB : VISIBLE;
     const w = (containerRef.current.offsetWidth - GAP * (vis - 1)) / vis;
     setCardWidth(Math.floor(w));
   }, []);
@@ -51,8 +51,12 @@ export default function BestSellers({ products, onQuickView }: BestSellersProps)
 
   const slide = (dir: 'prev' | 'next') => {
     const t = trackRef.current;
-    if (!t || !cardWidth) return;
-    t.scrollBy({ left: dir === 'next' ? cardWidth + GAP : -(cardWidth + GAP), behavior: 'smooth' });
+    if (!t) return;
+    const w = cardWidth || Math.floor(
+      ((containerRef.current?.offsetWidth || 320) - GAP * (window.innerWidth < 768 ? 1 : 3)) /
+      (window.innerWidth < 768 ? VISIBLE_MOB : VISIBLE)
+    );
+    t.scrollBy({ left: dir === 'next' ? w + GAP : -(w + GAP), behavior: 'smooth' });
     setTimeout(updateArrows, 520);
   };
 
@@ -76,22 +80,26 @@ export default function BestSellers({ products, onQuickView }: BestSellersProps)
   if (!products || products.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className="py-16 md:py-24 container-custom">
+    <section ref={sectionRef} className="py-6 md:py-10 container-custom">
       <div ref={headerRef} className="flex items-end justify-between mb-8">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-1">Fan Favourites</p>
-          <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-tight text-gray-800">Best Sellers</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-800">Best Sellers</h2>
         </div>
         <Link href="/bestsellers" className="text-[11px] font-semibold tracking-[0.15em] uppercase underline underline-offset-4 opacity-60 hover:opacity-100 transition-opacity">
           View All
         </Link>
       </div>
 
-      <div ref={containerRef} className="relative"
+      <div
+        ref={containerRef}
+        className="relative"
         onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}>
+        onMouseLeave={() => setHovered(false)}
+      >
         {/* Prev arrow */}
         <button
+          suppressHydrationWarning
           onClick={() => slide('prev')}
           aria-label="Previous"
           className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
@@ -121,6 +129,7 @@ export default function BestSellers({ products, onQuickView }: BestSellersProps)
 
         {/* Next arrow */}
         <button
+          suppressHydrationWarning
           onClick={() => slide('next')}
           aria-label="Next"
           className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50

@@ -3,6 +3,22 @@
 
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'RostexOutline';
+  src: url('/fonts/Rostex-Outline.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'RostexRegular';
+  src: url('/fonts/Rostex-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ========================================
    DRIPNGRID - Premium Fashion Theme
    Strict Black & White Color Palette
@@ -245,11 +261,12 @@
 
   /* Giant Brand Name (END SECTION) */
   .brand-giant {
-    font-size: clamp(3rem, 12vw, 10rem);
-    letter-spacing: 0.15em;
+    font-size: clamp(1.6rem, 7.2vw, 10rem);
+    letter-spacing: 0.1em;
     font-weight: 600;
     text-transform: uppercase;
     line-height: 1;
+    max-width: 100%;
   }
 
   /* ========================================
@@ -705,7 +722,8 @@
   }
 
   .brand-giant {
-    letter-spacing: 0.1em;
+    font-size: 5.5vw;
+    letter-spacing: 0.04em;
   }
 }
 

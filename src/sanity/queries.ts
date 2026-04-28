@@ -153,8 +153,8 @@ export const newArrivalsQuery = `*[_type == "product" && badge == "new" && isHid
   inStock
 }`;
 
-// Get best sellers (first 4 products, can be customized)
-export const bestSellersQuery = `*[_type == "product" && isHidden != true] | order(salesCount desc)[0...4] {
+// Get best sellers (top 8 products by sales)
+export const bestSellersQuery = `*[_type == "product" && isHidden != true] | order(salesCount desc)[0...8] {
   _id,
   name,
   slug,

@@ -107,11 +107,19 @@ export default function HomeContent({
         bannerButton2Link={banner?.bannerButton2Link ?? '/women'}
       />
 
-      {/* New Arrivals */}
-      <NewArrivals products={newArrivals} onQuickView={handleQuickView} />
+      {/* On mobile: GenderBanner appears first, then New Arrivals.
+          On desktop: New Arrivals first, then GenderBanner — achieved via CSS order. */}
+      <div className="flex flex-col">
+        <div className="order-2 md:order-1">
+          <NewArrivals products={newArrivals} onQuickView={handleQuickView} />
+        </div>
+        <div className="order-1 md:order-2">
+          <GenderBanner />
+        </div>
+      </div>
 
-      {/* Shop Men / Women Banner */}
-      <GenderBanner />
+      {/* Divider */}
+      <div className="w-full h-px bg-gray-200" />
 
       {/* Best Sellers */}
       <BestSellers products={bestSellers} onQuickView={handleQuickView} />
@@ -126,6 +134,9 @@ export default function HomeContent({
       {/* Shop Men — product carousel */}
       <GenderSection gender="Men" products={menProducts} href="/men" onQuickView={handleQuickView} />
 
+      {/* Divider */}
+      <div className="w-full h-px bg-gray-200 mx-auto" />
+
       {/* Shop Women — product carousel */}
       <GenderSection gender="Women" products={womenProducts} href="/women" onQuickView={handleQuickView} />
 
@@ -134,12 +145,6 @@ export default function HomeContent({
 
       {/* Lookbook — hidden for now, re-enable when ready */}
       {/* <Lookbook lookbookImages={lookbookImages} /> */}
-
-      {/* Divider */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent opacity-50 my-8 md:my-12" />
-
-      {/* Newsletter */}
-      <Newsletter />
 
       {/* Feature Banner */}
       <FeatureBanner featuredImages={lookbookImages} />

@@ -19,7 +19,7 @@ export default function EndSection() {
 
   return (
     <div className="bg-black py-20 md:py-32 relative overflow-hidden">
-      <div className="container-custom flex items-center justify-center">
+      <div style={{ width: '100%', textAlign: 'center', overflow: 'hidden' }}>
         <Shuffle
           text="DRIPNGRID"
           tag="h2"
@@ -38,10 +38,11 @@ export default function EndSection() {
           className="brand-giant"
           style={{
             color: '#ffffff',
-            fontFamily: 'var(--font-display), sans-serif',
-            letterSpacing: '0.15em',
-            fontWeight: 600,
+            fontFamily: "'RostexOutline', sans-serif",
+            fontWeight: 'normal',
             cursor: 'default',
+            fontSize: 'clamp(0px, 6vw, 9rem)',
+            letterSpacing: '0.02em',
           }}
         />
       </div>
