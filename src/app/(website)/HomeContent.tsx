@@ -107,6 +107,9 @@ export default function HomeContent({
         bannerButton2Link={banner?.bannerButton2Link ?? '/women'}
       />
 
+      {/* Divider between landing banner and sections below */}
+      <div className="w-full h-px bg-gray-200" />
+
       {/* On mobile: GenderBanner appears first, then New Arrivals.
           On desktop: New Arrivals first, then GenderBanner — achieved via CSS order. */}
       <div className="flex flex-col">

@@ -122,14 +122,20 @@ export default function PremiumBanner({
         }
       `}</style>
 
-      {/* Base image */}
-      <div className="absolute inset-0 z-0" style={bg(images[activeIdx])} />
+      {/* Mobile background — static, only on small screens */}
+      <div
+        className="absolute inset-0 z-0 md:hidden"
+        style={bg('/images/mobilebackgroundnew.png')}
+      />
 
-      {/* Incoming image wipe */}
+      {/* Desktop base image — hidden on mobile */}
+      <div className="absolute inset-0 z-0 hidden md:block" style={bg(images[activeIdx])} />
+
+      {/* Desktop incoming image wipe — hidden on mobile */}
       {animating && incomingIdx !== null && (
         <div
           key={incomingIdx}
-          className="absolute inset-0"
+          className="absolute inset-0 hidden md:block"
           style={{
             ...bg(images[incomingIdx]),
             animation: `${wipeAnim} 1.2s ease-in-out forwards`,
@@ -200,7 +206,7 @@ export default function PremiumBanner({
       {/* Timer dots */}
       {images.length > 1 && (
         <div
-          className="absolute bottom-7 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3"
+          className="absolute bottom-7 left-1/2 -translate-x-1/2 z-20 hidden md:flex items-center gap-3"
           onClick={e => e.stopPropagation()}
         >
           {images.map((_, i) => {

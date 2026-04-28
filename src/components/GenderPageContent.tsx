@@ -68,7 +68,7 @@ export default function GenderPageContent({
                     <p>No products found in this collection yet.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-y-12">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-y-12">
                     {products.map((product) => (
                         <ProductCard key={product.id || product._id} product={product} onQuickView={handleQuickView} />
                     ))}

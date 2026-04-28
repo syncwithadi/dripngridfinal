@@ -186,6 +186,8 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                             <h1 className="text-base md:text-lg font-semibold tracking-wide text-black uppercase leading-tight">
                                 {product.name}
                             </h1>
+                            {/* Heart wishlist button — commented out */}
+                            {/*
                             <button suppressHydrationWarning onClick={handleWishlist}
                                 className="flex-shrink-0 mt-0.5 transition-colors"
                                 style={{ color: isWishlisted ? '#D02C2C' : '#9ca3af' }}
@@ -194,6 +196,7 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                 </svg>
                             </button>
+                            */}
                         </div>
 
                         {/* Reviews */}
@@ -271,10 +274,10 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                                 {isAdding ? 'Adding…' : isSoldOut ? 'Sold Out' : 'Add to Cart'}
                             </button>
                             <button onClick={handleWishlist} suppressHydrationWarning
-                                className="w-[46px] flex-shrink-0 flex items-center justify-center border border-gray-300 rounded-md transition-all duration-200 hover:border-black"
+                                className="w-[46px] flex-shrink-0 flex items-center justify-center border border-gray-300 rounded-md bg-white transition-all duration-200 hover:border-black"
                                 aria-label="Save to wishlist">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill={isWishlisted ? 'currentColor' : 'none'} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4.5 h-4.5"
-                                    style={{ color: isWishlisted ? '#D02C2C' : '#6b7280' }}>
+                                    style={{ color: isWishlisted ? 'black' : '#6b7280' }}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                                 </svg>
                             </button>
@@ -323,7 +326,8 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                 </div>
             </div>
 
-            {/* MOBILE STICKY BAR */}
+            {/* MOBILE STICKY BAR — commented out */}
+            {/*
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
                 <button onClick={handleAddToCart} disabled={isSoldOut || isAdding}
                     className="flex-1 bg-black text-white py-3.5 text-[11px] font-bold tracking-[0.2em] uppercase rounded-sm hover:bg-black/90 active:scale-[0.98] disabled:opacity-40 transition-all duration-200">
@@ -337,6 +341,7 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                     </svg>
                 </button>
             </div>
+            */}
 
             {/* LIGHTBOX */}
             {lightboxOpen && allImages.length > 0 && (

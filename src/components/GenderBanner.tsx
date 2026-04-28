@@ -32,7 +32,6 @@ export default function GenderBanner({
       <section
         className="md:hidden w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth
           [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        style={{ paddingRight: '10vw' }}
       >
         {panels.map(({ label, href, image, placeholder }) => (
           <Link
@@ -42,7 +41,7 @@ export default function GenderBanner({
             style={{
               width: '88vw',
               aspectRatio: '3/4',
-              marginRight: '8px',
+              marginRight: '1px',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -114,7 +113,7 @@ export default function GenderBanner({
 
             {/* Vertical divider */}
             {label === 'SHOP MENS' && (
-              <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white/20 z-10" />
+              <div className="absolute right-0 top-0 bottom-0 w-px bg-white/10 z-10" />
             )}
           </Link>
         ))}

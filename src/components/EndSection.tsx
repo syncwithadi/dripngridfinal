@@ -41,7 +41,7 @@ export default function EndSection() {
             fontFamily: "'RostexOutline', sans-serif",
             fontWeight: 'normal',
             cursor: 'default',
-            fontSize: 'clamp(0px, 6vw, 9rem)',
+            fontSize: 'clamp(0px, 6.9vw, 9rem)',
             letterSpacing: '0.02em',
           }}
         />
