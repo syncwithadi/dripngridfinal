@@ -291,7 +291,7 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
 
                         {/* Delivery checker */}
                         <div className="border border-gray-200 rounded-xl p-3.5 mb-5">
-                            <p className="text-[11px] font-semibold text-gray-700 mb-2.5">Check Delivery and Pickup:</p>
+                            <p className="text-[11px] font-semibold text-gray-700 mb-2.5">Check Delivery:</p>
                             <div className="flex gap-2">
                                 <div className="flex-1 relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -315,7 +315,7 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                                 <p className="mt-2.5 text-xs text-gray-600">{deliveryMsg}</p>
                             ) : (
                                 <p className="mt-2.5 text-xs text-gray-500 text-center">
-                                    Enter your pincode to <strong className="font-semibold text-gray-700">check delivery date</strong> and <strong className="font-semibold text-gray-700">nearby store availability</strong>
+                                    Enter your pincode to <strong className="font-semibold text-gray-700">check delivery date</strong> and <strong className="font-semibold text-gray-700">estimated arrival</strong>
                                 </p>
                             )}
                         </div>

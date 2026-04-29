@@ -532,13 +532,28 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
 
       {/* ── MOBILE MENU ─────────────────────────────────────────────────────── */}
       <div className={`fixed inset-0 bg-white z-[999] lg:hidden flex flex-col transition-all duration-300 ${isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-        <div className="flex items-center justify-between px-5 h-14 border-b border-gray-100">
-          <span
-            className="text-2xl tracking-[0.14em] uppercase text-black select-none"
-            style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}
-          >
-            DRIPNGRID
-          </span>
+        <div className="relative flex items-center h-14 border-b border-gray-100 px-5">
+          {/* Centered logo */}
+          <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+            <Link href="/" onClick={() => setIsMobileOpen(false)} className="pointer-events-auto flex items-center">
+              {brandLogo && !logoLoadError ? (
+                <img
+                  src={brandLogo}
+                  alt={siteName || 'DRIPNGRID'}
+                  className="object-contain"
+                  style={{ maxHeight: 32, width: 'auto' }}
+                  onError={() => setLogoLoadError(true)}
+                />
+              ) : (
+                <span
+                  className="text-2xl tracking-[0.14em] uppercase text-black select-none"
+                  style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}
+                >
+                  {siteName || 'DRIPNGRID'}
+                </span>
+              )}
+            </Link>
+          </div>
           <button
             onClick={() => setIsMobileOpen(false)}
             className="flex flex-col justify-center gap-[5px] w-9 h-9"

@@ -83,6 +83,21 @@ function CheckoutContent() {
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [showCouponPanel,  setShowCouponPanel]  = useState(false);
 
+  // ── Site logo (fetched from Sanity via API) ────────────────────────────────
+  const [siteLogo, setSiteLogo]   = useState<string | null>(null);
+  const [logoWidth, setLogoWidth] = useState(140);
+  const [siteName, setSiteName]   = useState('DRIPNGRID');
+  useEffect(() => {
+    fetch('/api/site-settings')
+      .then(r => r.json())
+      .then(d => {
+        if (d.brandLogo) setSiteLogo(d.brandLogo);
+        if (d.logoWidth)  setLogoWidth(d.logoWidth);
+        if (d.siteName)   setSiteName(d.siteName);
+      })
+      .catch(() => {});
+  }, []);
+
   // Wait for Zustand to rehydrate from localStorage before checking cart
   useEffect(() => { setMounted(true); }, []);
   const [formData, setFormData] = useState<FormData>({
@@ -347,10 +362,16 @@ function CheckoutContent() {
   return (
     <>
       {/* ── Minimal checkout header ─────────────────────────────── */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 h-14 flex items-center justify-between">
         <div className="w-8" /> {/* spacer */}
-        <Link href="/" className="text-sm tracking-[0.14em] uppercase text-black select-none" style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}>
-          DRIPNGRID
+        <Link href="/" className="flex items-center select-none">
+          {siteLogo ? (
+            <img src={siteLogo} alt={siteName} className="object-contain" style={{ maxHeight: 32, width: 'auto' }} />
+          ) : (
+            <span className="text-sm tracking-[0.14em] uppercase text-black" style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}>
+              {siteName}
+            </span>
+          )}
         </Link>
         <Link href="/checkout" className="text-gray-500 hover:text-black transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -757,12 +778,7 @@ function CheckoutContent() {
         phone={formData.phone}
         onClose={() => setShowOtpModal(false)}
         onVerified={handleOtpVerified}
-        onNeedsPassword={(userData) => {
-          setShowOtpModal(false);
-          setVerifiedUser(userData);
-          setShowPasswordModal(true);
-        }}
-      />
+            />
       <CreatePasswordModal
         isOpen={showPasswordModal}
         email={verifiedUser?.email || formData.email}
