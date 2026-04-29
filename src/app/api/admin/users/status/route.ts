@@ -72,8 +72,8 @@ export async function GET(req: NextRequest) {
     });
 
     // Sort: online first, then idle, then offline
-    const order = { online: 0, idle: 1, offline: 2 };
-    withStatus.sort((a: any, b: any) => order[a.status] - order[b.status]);
+    const order: Record<'online' | 'idle' | 'offline', number> = { online: 0, idle: 1, offline: 2 };
+    withStatus.sort((a: any, b: any) => order[a.status as 'online'|'idle'|'offline'] - order[b.status as 'online'|'idle'|'offline']);
 
     return NextResponse.json({ users: withStatus });
   } catch (err) {
