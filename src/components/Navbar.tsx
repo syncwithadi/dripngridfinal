@@ -540,8 +540,8 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
                 <img
                   src={brandLogo}
                   alt={siteName || 'DRIPNGRID'}
-                  className="object-contain"
-                  style={{ maxHeight: 32, width: 'auto' }}
+                  className="h-auto object-contain"
+                  style={{ width: (logoWidth || 140) * 0.5 }}
                   onError={() => setLogoLoadError(true)}
                 />
               ) : (

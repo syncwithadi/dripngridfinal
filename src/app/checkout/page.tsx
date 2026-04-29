@@ -366,7 +366,7 @@ function CheckoutContent() {
         <div className="w-8" /> {/* spacer */}
         <Link href="/" className="flex items-center select-none">
           {siteLogo ? (
-            <img src={siteLogo} alt={siteName} className="object-contain" style={{ maxHeight: 32, width: 'auto' }} />
+            <img src={siteLogo} alt={siteName} className="h-auto object-contain" style={{ width: logoWidth * 0.5 }} />
           ) : (
             <span className="text-sm tracking-[0.14em] uppercase text-black" style={{ fontFamily: "'RostexRegular', sans-serif", fontWeight: 'normal' }}>
               {siteName}
