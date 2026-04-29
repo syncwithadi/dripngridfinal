@@ -14,6 +14,11 @@ import verificationToken from './verificationToken';
 import otp from './otp';
 import { blogSchema } from './blog';
 import { couponSchema } from './coupon';
+import { adminUserSchema } from './adminUser';
+import { adminLogSchema } from './adminLog';
+import { couponRequestSchema } from './couponRequest';
+import { systemConfigSchema } from './systemConfig';
+import { adminSessionSchema } from './adminSession';
 
 export const schemaTypes = [
   productSchema,
@@ -31,4 +36,9 @@ export const schemaTypes = [
   account,
   verificationToken,
   otp,
+  adminUserSchema,
+  adminLogSchema,
+  couponRequestSchema,
+  systemConfigSchema,
+  adminSessionSchema,
 ];

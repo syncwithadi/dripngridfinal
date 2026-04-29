@@ -132,6 +132,21 @@ export default defineType({
             readOnly: true,
             description: 'History of previous password hashes',
         }),
+        // Visibility control (super_admin only)
+        defineField({
+            name: 'visibility',
+            title: 'Visibility',
+            type: 'string',
+            description: 'Set to "hidden" to hide from admin/employee views. Only super_admin can see.',
+            options: {
+                list: [
+                    { title: '🟢 Public', value: 'public' },
+                    { title: '🔒 Hidden', value: 'hidden' },
+                ],
+                layout: 'radio',
+            },
+            initialValue: 'public',
+        }),
         // Relations to other documents
         defineField({
             name: 'wishlist',

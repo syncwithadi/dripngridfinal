@@ -260,6 +260,23 @@ export const orderSchema = {
       group: 'notes',
       description: 'Internal notes about this order (not visible to customer)',
     },
+
+    // ===== ADMIN CONTROLS =====
+    {
+      name: 'visibility',
+      title: 'Visibility',
+      type: 'string',
+      group: 'notes',
+      description: 'Set to "hidden" to hide from admin/employee views. Only super_admin can see hidden orders.',
+      options: {
+        list: [
+          { title: '🟢 Public', value: 'public' },
+          { title: '🔒 Hidden', value: 'hidden' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'public',
+    },
   ],
 
   // Enhanced preview showing status prominently

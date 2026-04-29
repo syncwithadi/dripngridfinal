@@ -280,11 +280,10 @@ function CheckoutContent() {
         body: JSON.stringify({
           items: items.map(item => ({
             productId: item.productId,
-            productName: item.name,
             size: item.size,
             color: item.color,
             quantity: item.quantity,
-            priceINR: item.priceINR,
+            // priceINR intentionally NOT sent — backend fetches real price from DB
           })),
           customer: {
             name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -300,14 +299,15 @@ function CheckoutContent() {
             country: formData.country,
           },
           paymentMethod,
-          ...(appliedCoupon ? { discountCode: appliedCoupon.code, discountAmount } : {}),
+          // Only send coupon code — backend validates & computes discount server-side
+          ...(appliedCoupon ? { discountCode: appliedCoupon.code } : {}),
           ...(verifiedUser ? { userId: verifiedUser.id } : {}),
         }),
       });
       const orderData = await orderResponse.json();
       if (!orderData.success) throw new Error(orderData.error || 'Failed to create order');
 
-      if (paymentMethod === 'cod') {
+      if (paymentMethod === 'cod' || orderData.order.isFree) {
         setOrderingSuccess(true);
         clearCart();
         router.push(`/order-confirmation?order=${orderData.order.orderNumber}`);
@@ -322,28 +322,41 @@ function CheckoutContent() {
         description: `Order #${orderData.order.orderNumber}`,
         order_id: orderData.order.razorpayOrderId,
         handler: async (response: any) => {
-          const verifyRes = await fetch('/api/payment/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              orderId: orderData.order.id,
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyData.success) {
-            setOrderingSuccess(true);
-            clearCart();
-            router.push(`/order-confirmation?order=${orderData.order.orderNumber}`);
-          } else {
-            setError('Payment verification failed. Please contact support.');
+          try {
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: orderData.order.id,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              setOrderingSuccess(true);
+              clearCart();
+              router.push(`/order-confirmation?order=${orderData.order.orderNumber}`);
+            } else {
+              setError('Payment verification failed. Please contact support.');
+            }
+          } catch {
+            // If frontend verification fails, the Razorpay webhook will still
+            // capture the payment server-side. Show a reassuring message.
+            setError('We received your payment but had trouble confirming. Please check your email or contact support.');
+          } finally {
+            setIsLoading(false);
           }
         },
         prefill: { name: `${formData.firstName} ${formData.lastName}`.trim(), email: formData.email, contact: formData.phone },
         theme: { color: '#000000' },
-        modal: { ondismiss: () => setIsLoading(false) },
+        modal: {
+          ondismiss: () => {
+            setIsLoading(false);
+            // Order stays as pending_payment in DB — auto-cleanup will cancel it after 30 min
+          },
+        },
       };
       const rp = new window.Razorpay(options);
       rp.open();
