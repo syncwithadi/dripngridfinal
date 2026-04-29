@@ -94,6 +94,7 @@ export default function NewArrivals({ products, onQuickView }: NewArrivalsProps)
         onMouseLeave={() => setHovered(false)}>
         {/* Prev arrow */}
         <button
+          suppressHydrationWarning
           onClick={() => slide('prev')}
           aria-label="Previous"
           className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50
@@ -123,6 +124,7 @@ export default function NewArrivals({ products, onQuickView }: NewArrivalsProps)
 
         {/* Next arrow */}
         <button
+          suppressHydrationWarning
           onClick={() => slide('next')}
           aria-label="Next"
           className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-200 hover:bg-gray-50

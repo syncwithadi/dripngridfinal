@@ -602,17 +602,24 @@ function CheckoutContent() {
 
                   {/* Applied coupon badge */}
                   {appliedCoupon && (
-                    <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-green-600 flex-shrink-0">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clipRule="evenodd" />
-                        </svg>
+                    <div className="flex items-center justify-between bg-black rounded-lg px-3.5 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 text-white">
+                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                          </svg>
+                        </div>
                         <div>
-                          <span className="text-sm font-semibold text-green-700">{appliedCoupon.code}</span>
-                          <span className="text-xs text-green-600 ml-1.5">&#8212; {couponSuccess}</span>
+                          <p className="text-white text-[11px] font-bold tracking-widest uppercase">{appliedCoupon.code}</p>
+                          <p className="text-white/55 text-[10px] mt-0.5">{couponSuccess}</p>
                         </div>
                       </div>
-                      <button onClick={handleRemoveCoupon} className="text-xs text-gray-400 hover:text-red-500 transition-colors ml-2 flex-shrink-0">Remove</button>
+                      <button
+                        onClick={handleRemoveCoupon}
+                        className="text-[10px] font-medium text-white/40 hover:text-white/80 transition-colors tracking-wider uppercase ml-2 flex-shrink-0"
+                      >
+                        Remove
+                      </button>
                     </div>
                   )}
 
@@ -667,6 +674,10 @@ function CheckoutContent() {
                         const label = c.type === 'percent'
                           ? c.value + '% off' + (c.maxDiscount ? ' (max ₹' + c.maxDiscount.toLocaleString('en-IN') + ')' : '')
                           : '₹' + c.value.toLocaleString('en-IN') + ' off';
+                        // Guard against description stored twice in Sanity (data-entry glitch)
+                        const rawDesc: string = c.description || '';
+                        const half = rawDesc.slice(0, rawDesc.length / 2);
+                        const cleanDesc = half && half === rawDesc.slice(rawDesc.length / 2) ? half : rawDesc;
                         return (
                           <div key={c.code} className="flex items-center gap-3 px-3.5 py-3">
                             <div className="flex-1 min-w-0">
@@ -674,8 +685,8 @@ function CheckoutContent() {
                                 <span className="font-mono text-xs font-bold bg-black text-white px-2 py-0.5 rounded tracking-widest">{c.code}</span>
                                 <span className="text-xs font-semibold text-gray-800">{label}</span>
                               </div>
-                              {c.description && (
-                                <p className="text-[11px] text-gray-500 mt-0.5">{c.description}</p>
+                              {cleanDesc && (
+                                <p className="text-[11px] text-gray-500 mt-0.5">{cleanDesc}</p>
                               )}
                               {!meetsMin && needed > 0 && (
                                 <p className="text-[11px] text-orange-500 mt-0.5 font-medium">
@@ -708,8 +719,8 @@ function CheckoutContent() {
                   </div>
                   {discountAmount > 0 && appliedCoupon && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">Coupon ({appliedCoupon.code})</span>
-                      <span className="font-medium text-green-600">-{formatPrice(discountAmount)}</span>
+                      <span className="text-gray-500">Coupon <span className="font-mono text-xs tracking-wider text-gray-700">{appliedCoupon.code}</span></span>
+                      <span className="font-semibold text-black">-{formatPrice(discountAmount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
@@ -726,8 +737,8 @@ function CheckoutContent() {
                     </div>
                   </div>
                   {discountAmount > 0 && (
-                    <p className="text-[11px] text-green-600 text-right font-medium">
-                      You save {formatPrice(discountAmount)} on this order!
+                    <p className="text-[10px] text-gray-400 text-right tracking-wide uppercase">
+                      You save {formatPrice(discountAmount)}
                     </p>
                   )}
                 </div>
