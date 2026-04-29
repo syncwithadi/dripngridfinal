@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display, Outfit, Bodoni_Moda, Bebas_Neue } from 'next/font/google';
+import Script from "next/script";
 import '../globals.css';
 import Navbar from '@/components/Navbar';
 import PromoRibbon from '@/components/PromoRibbon';
@@ -187,6 +188,19 @@ export default async function RootLayout({
             </CurrencyProvider>
           </AuthProvider>
         </ThemeProvider>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-YPNDPVYWPQ"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-YPNDPVYWPQ');
+          `}
+        </Script>
       </body>
     </html>
   );
