@@ -1,8 +1,20 @@
+import { Metadata } from 'next';
 import { sanityClient } from '@/sanity/client';
 import GenderPageContent from '@/components/GenderPageContent';
 import { urlFor } from '@/sanity/image';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'New Arrivals | DRIPNGRID',
+  description: 'Discover the latest releases from DRIPNGRID. Fresh drops designed with bold intent and refined quality.',
+  alternates: { canonical: 'https://dripngrid.in/new-arrivals' },
+  openGraph: {
+    title: 'New Arrivals | DRIPNGRID',
+    description: 'Discover the latest releases from DRIPNGRID. Fresh drops designed with bold intent and refined quality.',
+    url: 'https://dripngrid.in/new-arrivals',
+  },
+};
 
 const newArrivalsPageQuery = `*[_type == "product" && isHidden != true] | order(_createdAt desc) {
   _id, name, slug, priceINR, originalPriceINR,

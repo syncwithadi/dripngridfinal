@@ -1,8 +1,20 @@
+import { Metadata } from 'next';
 import { sanityClient } from '@/sanity/client';
 import GenderPageContent from '@/components/GenderPageContent';
 import { urlFor } from '@/sanity/image';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Bestsellers | DRIPNGRID',
+  description: "Explore DRIPNGRID's most sought-after pieces. Premium designs chosen by those who value quality and identity.",
+  alternates: { canonical: 'https://dripngrid.in/bestsellers' },
+  openGraph: {
+    title: 'Bestsellers | DRIPNGRID',
+    description: "Explore DRIPNGRID's most sought-after pieces. Premium designs chosen by those who value quality and identity.",
+    url: 'https://dripngrid.in/bestsellers',
+  },
+};
 
 const bestsellersPageQuery = `*[_type == "product" && isHidden != true] | order(salesCount desc, _createdAt desc) {
   _id, name, slug, priceINR, originalPriceINR,

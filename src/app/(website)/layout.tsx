@@ -124,6 +124,12 @@ export default async function RootLayout({
           email: 'support@dripngrid.in',
           contactType: 'customer service',
         },
+        founder: {
+          '@type': 'Person',
+          name: 'Aditya Choudhury',
+        },
+        foundingDate: '2026',
+        description: 'DRIPNGRID is a contemporary Gen Z fashion label defined by bold design, refined aesthetics, and premium craftsmanship.',
       },
       {
         '@type': 'WebSite',
@@ -173,7 +179,7 @@ export default async function RootLayout({
 
               {/* Main Content - padding for fixed header (PromoRibbon ~36px + Navbar 56px/60px) */}
               <main className="pt-[96px]">
-                {children}
+                 {children}
               </main>
 
               {/* Footer */}

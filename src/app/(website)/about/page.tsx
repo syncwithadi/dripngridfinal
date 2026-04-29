@@ -25,13 +25,13 @@ export default function AboutPage() {
       {/* Content */}
       <div className="container-custom max-w-2xl py-16 md:py-24 space-y-10 text-[15px] text-gray-600 leading-relaxed">
         <p>
-          DRIPNGRID started with a simple frustration — great clothes that didn't cost a fortune, designed for people who care about how they look without trying too hard.
+          Founded by Aditya Choudhury in 2026, DRIPNGRID was born from a simple idea: clothing should look exceptional without feeling excessive. It is designed for those who value presence, not noise.
         </p>
         <p>
-          We design every piece to earn a permanent place in your wardrobe. Not trend-driven. Not disposable. Every cut, weight, and finish is considered.
+          Every piece is created to earn its place in your wardrobe. Nothing is rushed. Nothing is disposable. Each detail, from cut to fabric to finish, is considered with purpose.
         </p>
         <p>
-          We're based in India, making premium streetwear for the discerning generation — one that knows quality, appreciates subtlety, and refuses to settle.
+          Based in India, DRIPNGRID creates refined fashion for a generation that understands quality, values subtlety, and chooses intention over trends.
         </p>
 
         <div className="h-px bg-gray-100 my-10" />

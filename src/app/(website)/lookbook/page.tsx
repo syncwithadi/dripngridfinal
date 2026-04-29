@@ -7,6 +7,12 @@ import { urlFor } from '@/sanity/image';
 export const metadata: Metadata = {
   title: 'Lookbook — DRIPNGRID',
   description: 'Explore the latest DRIPNGRID lookbook — editorial styling for the new generation.',
+  alternates: { canonical: 'https://dripngrid.in/lookbook' },
+  openGraph: {
+    title: 'Lookbook — DRIPNGRID',
+    description: 'Explore the latest DRIPNGRID lookbook — editorial styling for the new generation.',
+    url: 'https://dripngrid.in/lookbook',
+  },
 };
 
 async function getLookbook() {
