@@ -133,7 +133,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <body className="bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
+      <body className="bg-black text-[var(--color-text)] antialiased">
         <ThemeProvider>
           <AuthProvider>
             <CurrencyProvider>
@@ -157,7 +157,7 @@ export default async function RootLayout({
               <MaintenanceBanner />
 
               {/* Main Content - padding for fixed header (PromoRibbon ~36px + Navbar 56px/60px) */}
-              <main className="page-transition pt-[96px]">
+              <main className="pt-[96px]">
                 {children}
               </main>
 
