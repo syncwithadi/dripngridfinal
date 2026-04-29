@@ -133,7 +133,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <body className="bg-black text-[var(--color-text)] antialiased">
+      <body className="bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
         <ThemeProvider>
           <AuthProvider>
             <CurrencyProvider>

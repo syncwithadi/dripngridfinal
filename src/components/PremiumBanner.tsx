@@ -118,7 +118,7 @@ export default function PremiumBanner({
 
   return (
     <div
-      className="relative w-full overflow-hidden -mt-[96px] cursor-pointer bg-black"
+      className="relative w-full overflow-hidden -mt-[96px] cursor-pointer"
       style={{ height: bannerHeight }}
       onClick={() => router.push('/new-arrivals')}
     >

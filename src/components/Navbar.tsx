@@ -198,7 +198,8 @@ export default function Navbar({ brandLogo, logoWidth, siteName }: NavbarProps) 
   const borderCol = onDark ? 'border-white/40' : 'border-black';
 
   // Transparent at top of home page, solid white everywhere else / on scroll
-  const headerBg = (isHomePage && !isScrolled)
+  // Also keep transparent until mounted so the navbar never flashes white before hydration
+  const headerBg = (!mounted || (isHomePage && !isScrolled))
     ? 'bg-transparent border-b border-transparent'
     : 'bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-[0_1px_12px_0_rgba(0,0,0,0.06)]';
 
