@@ -45,21 +45,21 @@ const bebas = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: 'DRIPNGRID — Drip So Sharp, It Cuts.',
-  description: 'DRIPNGRID is a premium fashion brand. Drip So Sharp, It Cuts.',
-  keywords: ['DRIPNGRID', 'drip so sharp it cuts', 'premium fashion', 'streetwear', 'luxury essentials', 'minimal style'],
+  title: 'DRIP N GRID',
+  description: 'DRIPNGRID is a premium fashion brand.',
+  keywords: ['DRIPNGRID', 'premium fashion', 'streetwear', 'luxury essentials', 'minimal style'],
   authors: [{ name: 'DRIPNGRID' }],
   openGraph: {
-    title: 'DRIPNGRID — Drip So Sharp, It Cuts.',
-    description: 'DRIPNGRID is a premium fashion brand. Drip So Sharp, It Cuts.',
+    title: 'DRIP N GRID',
+    description: 'DRIPNGRID is a premium fashion brand.',
     type: 'website',
     locale: 'en_US',
-    siteName: 'DRIPNGRID',
+    siteName: 'DRIP N GRID',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DRIPNGRID — Drip So Sharp, It Cuts.',
-    description: 'DRIPNGRID is a premium fashion brand. Drip So Sharp, It Cuts.',
+    title: 'DRIP N GRID',
+    description: 'DRIPNGRID is a premium fashion brand.',
   },
   robots: {
     index: true,

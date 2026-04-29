@@ -1,26 +1,71 @@
 'use client';
 
+const MESSAGES = [
+  'Flat 10% off on prepaid orders',
+  'Free delivery on orders above ₹499',
+  'Easy returns within 7 days',
+  'Premium quality guaranteed',
+];
+
+// 4 copies so content is always wider than any screen (including 4K)
+// Animation moves -25% = exactly one copy width — perfectly seamless
+const COPIES = [...MESSAGES, ...MESSAGES, ...MESSAGES, ...MESSAGES];
+
 export default function PromoRibbon() {
-  const messages = [
-    'Flat 10% off on prepaid orders',
-    'Free delivery on orders above ₹499',
-    'Easy returns within 7 days',
-    'Premium quality guaranteed',
-  ];
-
-  // Double the messages for seamless loop
-  const allMessages = [...messages, ...messages];
-
   return (
-    <div className="promo-ribbon overflow-hidden bg-[var(--color-inverted-bg)] text-[var(--color-inverted-text)] py-2.5">
-      <div className="promo-ribbon-track flex whitespace-nowrap">
-        {allMessages.map((message, index) => (
+    <div
+      style={{
+        overflow: 'hidden',
+        background: 'var(--color-inverted-bg)',
+        color: 'var(--color-inverted-text)',
+        padding: '10px 0',
+      }}
+    >
+      <style>{`
+        @keyframes promoScroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-25%); }
+        }
+        .promo-track {
+          display: inline-flex;
+          flex-wrap: nowrap;
+          white-space: nowrap;
+          width: max-content;
+          animation: promoScroll 32s linear infinite;
+          will-change: transform;
+        }
+        .promo-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+      <div className="promo-track">
+        {COPIES.map((msg, i) => (
           <span
-            key={index}
-            className="inline-flex items-center text-[10px] md:text-xs font-medium tracking-widest uppercase mx-8 md:mx-12"
+            key={i}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: '10px',
+              fontWeight: 500,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              padding: '0 2.5rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
           >
-            <span className="w-1 h-1 rounded-full bg-current mr-4 opacity-60" />
-            {message}
+            <span
+              style={{
+                width: 4,
+                height: 4,
+                borderRadius: '50%',
+                background: 'currentColor',
+                marginRight: 14,
+                opacity: 0.5,
+                flexShrink: 0,
+              }}
+            />
+            {msg}
           </span>
         ))}
       </div>

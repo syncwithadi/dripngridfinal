@@ -640,9 +640,16 @@
   }
 }
 
-/* Promo Ribbon Marquee */
+/* Promo Ribbon — dedicated keyframe, no shared dependency */
+@keyframes promoScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 .promo-ribbon-track {
-  animation: marquee 10s linear infinite;
+  display: flex;
+  width: max-content;        /* exact content width — no reflow */
+  animation: promoScroll 28s linear infinite;
   will-change: transform;
 }
 

@@ -3,14 +3,13 @@
 import { useEffect, useRef } from 'react';
 
 const AWAY_MESSAGES = [
-  '👋 Come back!',
-  '🩷 We miss you!',
+  'We miss you! 💔',
   '🔥 Don\'t miss out!',
-  '✨ New drops waiting…',
-  '⚡ Come see what\'s new!',
+  '👀 Come back!',
+  '⚡️ New drops waiting!',
 ];
 
-const ORIGINAL_TITLE = 'DRIPNGRID — Drip So Sharp, It Cuts.';
+const ORIGINAL_TITLE = 'DRIP N GRID';
 const INTERVAL_MS    = 2000;
 
 export function useTabTitleAnimation() {

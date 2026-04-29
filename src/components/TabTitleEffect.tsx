@@ -3,13 +3,12 @@
 import { useEffect } from 'react';
 
 const AWAY_TITLES = [
-    '👋 Come back!',
-    '🩷 We miss you!',
+    'We miss you! 💔',
     '🔥 Don\'t miss out!',
-    '✨ New drops waiting…',
-    '⚡ Come see what\'s new!',
+    '👀 Come back!',
+    '⚡️ New drops waiting!',
 ];
-const DEFAULT_TITLE = 'DRIPNGRID — Drip So Sharp, It Cuts.';
+const DEFAULT_TITLE = 'DRIP N GRID';
 
 export default function TabTitleEffect() {
     useEffect(() => {
