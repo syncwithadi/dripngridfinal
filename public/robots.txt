@@ -10,5 +10,6 @@ Disallow: /order-confirmation
 Disallow: /track-order
 Disallow: /wishlist
 Disallow: /api/
+Disallow: /studio/
 
 Sitemap: https://dripngrid.in/sitemap.xml

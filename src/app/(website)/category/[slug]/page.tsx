@@ -1,9 +1,24 @@
+import { Metadata } from 'next';
 import { sanityClient } from '@/sanity/client';
 import { productsByCategoryQuery } from '@/sanity/queries';
 import CategoryContent from './CategoryContent';
 
-// Revalidate every 60 seconds for improved SEO performance
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const label = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return {
+    title: `${label} | DRIPNGRID`,
+    description: `Shop ${label} by DRIPNGRID — bold design, premium quality streetwear.`,
+    alternates: { canonical: `https://dripngrid.in/category/${slug}` },
+    openGraph: {
+      title: `${label} | DRIPNGRID`,
+      description: `Shop ${label} by DRIPNGRID — bold design, premium quality streetwear.`,
+      url: `https://dripngrid.in/category/${slug}`,
+    },
+  };
+}
 
 // Update type definition for Next.js 15+
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -24,7 +39,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     }
   } catch (error) {
     console.error(`Error fetching products for category ${slug}:`, error);
-    // products remains []
   }
 
   return (

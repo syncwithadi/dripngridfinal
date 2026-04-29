@@ -1,10 +1,21 @@
+import { Metadata } from 'next';
 import { sanityClient } from '@/sanity/client';
 import { productsByGenderQuery } from '@/sanity/queries';
 import GenderPageContent from '@/components/GenderPageContent';
 import { urlFor } from '@/sanity/image';
 
-// Revalidate every 60 seconds for improved SEO performance
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Women's Collection | DRIPNGRID",
+  description: "Shop women's streetwear by DRIPNGRID — crop tops, hoodies, skirts, and more. Refined aesthetics, premium craftsmanship.",
+  alternates: { canonical: 'https://dripngrid.in/women' },
+  openGraph: {
+    title: "Women's Collection | DRIPNGRID",
+    description: "Shop women's streetwear by DRIPNGRID — crop tops, hoodies, skirts, and more.",
+    url: 'https://dripngrid.in/women',
+  },
+};
 
 export default async function WomenPage() {
     const productsRaw = await sanityClient.fetch(productsByGenderQuery, { gender: 'Women' });

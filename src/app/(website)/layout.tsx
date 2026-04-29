@@ -48,14 +48,29 @@ const bebas = Bebas_Neue({
   display: 'swap',
 });
 
+const DESCRIPTION = 'DRIPNGRID is a contemporary Gen Z fashion label defined by bold design, refined aesthetics, and premium craftsmanship.';
+
 export const metadata: Metadata = {
+  metadataBase: new URL('https://dripngrid.in'),
   title: 'DRIP N GRID',
-  description: 'DRIPNGRID is a premium fashion brand.',
-  keywords: ['DRIPNGRID', 'premium fashion', 'streetwear', 'luxury essentials', 'minimal style'],
+  description: DESCRIPTION,
+  keywords: ['DRIPNGRID', 'premium fashion', 'streetwear', 'luxury essentials', 'minimal style', 'Gen Z fashion', 'bold design'],
   authors: [{ name: 'DRIPNGRID' }],
+  manifest: '/site.webmanifest',
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-icon.png' }],
+    other: [
+      { rel: 'android-chrome', url: '/android-chrome-192x192.png' },
+      { rel: 'android-chrome', url: '/android-chrome-512x512.png' },
+    ],
+  },
   openGraph: {
     title: 'DRIP N GRID',
-    description: 'DRIPNGRID is a premium fashion brand.',
+    description: DESCRIPTION,
     type: 'website',
     locale: 'en_US',
     siteName: 'DRIP N GRID',
@@ -63,7 +78,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'DRIP N GRID',
-    description: 'DRIPNGRID is a premium fashion brand.',
+    description: DESCRIPTION,
   },
   robots: {
     index: true,
