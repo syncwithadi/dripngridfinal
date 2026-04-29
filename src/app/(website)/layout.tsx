@@ -13,6 +13,10 @@ import { sanityClient } from '@/sanity/client';
 import { siteSettingsQuery } from '@/sanity/queries';
 import TabTitleEffect from '@/components/TabTitleEffect';
 
+// Re-fetch site settings (logo, name, etc.) every 60 seconds
+// so Sanity Studio changes appear on the live site quickly
+export const revalidate = 60;
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-body',
