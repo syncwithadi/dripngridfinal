@@ -44,6 +44,10 @@ interface UserDetail {
   lastLogin?: string;
   lastActivityAt?: string;
   createdAt?: string;
+  profileImageUrl?: string;
+  department?: string;
+  internalTitle?: string;
+  phone?: string;
 }
 
 function ProfileContent({ employeeId }: { employeeId: string }) {
