@@ -147,7 +147,7 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
                 color: ROLE_TEXT[profile.role] || 'var(--as-badge-gray-text)',
                 textTransform: 'capitalize', letterSpacing: '0.04em',
               }}>
-                {profile.role.replace('_', ' ')}
+                {ROLE_LABEL[profile.role] || profile.role.replace('_', ' ')}
               </span>
               <span style={{
                 padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,

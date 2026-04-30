@@ -31,6 +31,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/customers':        'Customers',
   '/admin/logs':             'Audit Logs',
   '/admin/users':            'Team',
+  '/admin/profile':          'My Profile',
   '/admin/settings':         'Settings',
   '/admin/hidden':           'Hidden Data',
   '/admin/archive':          'Archive',
@@ -333,9 +334,14 @@ export default function AdminShell({ children, title: titleOverride }: { childre
     localStorage.setItem('admin_theme', next);
   }
 
-  const pageTitle = Object.entries(PAGE_TITLES).find(([key]) =>
-    pathname === key || (key !== '/admin' && pathname.startsWith(key))
-  )?.[1] || 'Admin';
+  let pageTitle = 'Admin';
+  if (pathname.startsWith('/admin/users/') && pathname !== '/admin/users') {
+    pageTitle = 'Profile';
+  } else {
+    pageTitle = Object.entries(PAGE_TITLES)
+      .sort(([a], [b]) => b.length - a.length)
+      .find(([key]) => pathname === key || (key !== '/admin' && pathname.startsWith(key + '/')))?.[1] || 'Admin';
+  }
 
   if (loading) {
     return (

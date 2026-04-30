@@ -83,22 +83,21 @@ const NAV_GROUPS: NavGroupDef[] = [
     ],
   },
   {
+    label: 'Team & Account',
+    defaultOpen: true,
+    items: [
+      { href: '/admin/users',    label: 'Team',        iconKey: 'users' },
+      { href: '/admin/profile',  label: 'My Profile',  iconKey: 'users', roles: ['employee'] },
+    ],
+  },
+  {
     label: 'Admin',
     defaultOpen: false,
     roles: ['super_admin', 'admin'],
     items: [
-      { href: '/admin/users',    label: 'Team',        iconKey: 'users',    roles: ['super_admin', 'admin'] },
       { href: '/admin/settings', label: 'Settings',    iconKey: 'settings', roles: ['super_admin'] },
       { href: '/admin/hidden',   label: 'Hidden Data', iconKey: 'hidden',   roles: ['super_admin'] },
       { href: '/admin/archive',  label: 'Archive',     iconKey: 'archive',  roles: ['super_admin'] },
-    ],
-  },
-  {
-    label: 'Account',
-    defaultOpen: true,
-    roles: ['employee'],
-    items: [
-      { href: '/admin/profile', label: 'My Profile', iconKey: 'users', roles: ['employee'] },
     ],
   },
 ];
