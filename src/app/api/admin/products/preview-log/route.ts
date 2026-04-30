@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
             generatedBy,
             "productName": product->name
         }`,
-        { token }
+        { token } as any
     );
 
     if (!tokenDoc) {

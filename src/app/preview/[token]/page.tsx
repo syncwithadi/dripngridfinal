@@ -26,7 +26,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ token:
                 inStock
             }
         }`,
-        { token }
+        { token } as any
     );
 
     if (!tokenDoc) {
