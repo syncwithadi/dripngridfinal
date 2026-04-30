@@ -140,3 +140,57 @@ export const sendOrderConfirmationEmail = async (order: OrderEmailProps) => {
         return { success: false, error };
     }
 };
+
+// ── Admin Internal Email ──────────────────────────────────────────────────────
+// Used by the Communications module for internal staff emails.
+// NEVER hardcode API keys — always uses process.env.RESEND_API_KEY
+
+export type AdminEmailFrom =
+  | 'noreply'
+  | 'support'
+  | 'admin';
+
+const FROM_ADDRESSES: Record<AdminEmailFrom, string> = {
+  noreply: `DRIPNGRID <noreply@dripngrid.in>`,
+  support: `DRIPNGRID Support <support@dripngrid.in>`,
+  admin:   `DRIPNGRID Admin <admin@dripngrid.in>`,
+};
+
+export interface AdminEmailPayload {
+  to: string;
+  subject: string;
+  html: string;
+  from?: AdminEmailFrom;   // defaults to 'admin'
+  replyTo?: string;        // optional reply-to address
+}
+
+/**
+ * Sends an internal admin email via Resend.
+ * Returns { success, messageId } or { success: false, error }.
+ */
+export async function sendAdminEmail(payload: AdminEmailPayload): Promise<
+  { success: true; messageId?: string } | { success: false; error: unknown }
+> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || apiKey.startsWith('re_123')) {
+    console.warn('[sendAdminEmail] RESEND_API_KEY not configured — skipping send.');
+    return { success: false, error: 'RESEND_API_KEY not configured' };
+  }
+
+  const sender = new Resend(apiKey);
+  const fromAddress = FROM_ADDRESSES[payload.from || 'admin'];
+
+  try {
+    const result = await sender.emails.send({
+      from: fromAddress,
+      to: [payload.to],
+      subject: payload.subject,
+      html: payload.html,
+      ...(payload.replyTo ? { reply_to: payload.replyTo } : {}),
+    });
+    return { success: true, messageId: result.data?.id };
+  } catch (error) {
+    console.error('[sendAdminEmail] Failed:', error);
+    return { success: false, error };
+  }
+}

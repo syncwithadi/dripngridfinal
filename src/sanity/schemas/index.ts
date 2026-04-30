@@ -19,6 +19,13 @@ import { adminLogSchema } from './adminLog';
 import { couponRequestSchema } from './couponRequest';
 import { systemConfigSchema } from './systemConfig';
 import { adminSessionSchema } from './adminSession';
+import { productRequestSchema } from './productRequest';
+import { adminTaskSchema } from './adminTask';
+import { internalReportSchema } from './internalReport';
+import { adminNotificationSchema } from './adminNotification';
+import { adminResourceSchema } from './adminResource';
+import { adminMailSchema } from './adminMail';
+import { previewToken } from './previewToken';
 
 export const schemaTypes = [
   productSchema,
@@ -41,4 +48,11 @@ export const schemaTypes = [
   couponRequestSchema,
   systemConfigSchema,
   adminSessionSchema,
+  productRequestSchema,
+  adminTaskSchema,
+  internalReportSchema,
+  adminNotificationSchema,
+  adminResourceSchema,
+  adminMailSchema,
+  previewToken,
 ];

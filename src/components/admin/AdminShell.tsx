@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminSidebar from './AdminSidebar';
 import AdminTopbar from './AdminTopbar';
+import CommandPalette from './CommandPalette';
 
 interface AdminUser {
   employeeId: string;
@@ -22,17 +23,22 @@ export const AdminContext = createContext<AdminCtx>({ user: null, theme: 'light'
 export const useAdmin = () => useContext(AdminContext);
 
 const PAGE_TITLES: Record<string, string> = {
-  '/admin': 'Dashboard',
-  '/admin/orders': 'Orders',
-  '/admin/inventory': 'Inventory',
-  '/admin/coupons': 'Coupons',
-  '/admin/requests': 'Requests',
-  '/admin/customers': 'Customers',
-  '/admin/logs': 'Audit Logs',
-  '/admin/users': 'User Management',
-  '/admin/settings': 'Settings',
-  '/admin/hidden': 'Hidden Data',
-  '/admin/archive': 'Archive',
+  '/admin':                  'Dashboard',
+  '/admin/orders':           'Orders',
+  '/admin/inventory':        'Inventory',
+  '/admin/coupons':          'Coupons',
+  '/admin/requests':         'Coupon Requests',
+  '/admin/customers':        'Customers',
+  '/admin/logs':             'Audit Logs',
+  '/admin/users':            'Staff',
+  '/admin/settings':         'Settings',
+  '/admin/hidden':           'Hidden Data',
+  '/admin/archive':          'Archive',
+  '/admin/product-requests': 'Product Requests',
+  '/admin/tasks':            'Tasks',
+  '/admin/internal':         'Internal Reports',
+  '/admin/resources':        'Resource Hub',
+  '/admin/communications':   'Communications',
 };
 
 const ADMIN_CSS = `
@@ -190,16 +196,49 @@ const ADMIN_CSS = `
 /* ── Spin animation (loading) ─────────────────────────────────── */
 @keyframes as-spin { to { transform: rotate(360deg); } }
 @keyframes as-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ── Mobile sidebar drawer ────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .as-main-content {
+    margin-left: 0 !important;
+    padding: 20px 16px 48px !important;
+  }
+  .as-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.26s cubic-bezier(0.4,0,0.2,1),
+                box-shadow 0.26s ease;
+  }
+  .as-sidebar.as-sidebar-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 32px rgba(0,0,0,0.22);
+  }
+  .as-hamburger {
+    display: flex !important;
+  }
+}
+@media (min-width: 1024px) {
+  .as-sidebar {
+    transform: none !important;
+    transition: none !important;
+  }
+  .as-sidebar-overlay {
+    display: none !important;
+  }
+  .as-hamburger {
+    display: none !important;
+  }
+}
 `;
 
 // Idle detection thresholds
 const IDLE_THRESHOLD_MS = 5 * 60 * 1000;  // 5 minutes no input = idle
 const HEARTBEAT_INTERVAL_MS = 30 * 1000;  // send heartbeat every 30s
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+export default function AdminShell({ children, title: titleOverride }: { children: React.ReactNode; title?: string }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -313,15 +352,18 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   return (
     <AdminContext.Provider value={{ user, theme }}>
       <style dangerouslySetInnerHTML={{ __html: ADMIN_CSS }} />
+      <CommandPalette />
       <div id="admin-shell" data-theme={theme} style={{ minHeight: '100vh', background: 'var(--as-bg)', color: 'var(--as-text)', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", letterSpacing: '-0.01em' }}>
         <AdminSidebar
           role={user?.role || 'employee'}
           employeeName={user?.name || ''}
           employeeId={user?.employeeId || ''}
           profileImage={user?.profileImage}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
-        <div style={{ marginLeft: 240, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <AdminTopbar title={pageTitle} theme={theme} onToggleTheme={toggleTheme} />
+        <div className="as-main-content" style={{ marginLeft: 240, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <AdminTopbar title={titleOverride || pageTitle} theme={theme} onToggleTheme={toggleTheme} onMenuOpen={() => setSidebarOpen(true)} />
           <main style={{ flex: 1, padding: '32px 32px 56px' }}>
             {children}
           </main>

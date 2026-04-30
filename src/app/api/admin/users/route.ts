@@ -20,7 +20,9 @@ export async function GET(req: NextRequest) {
 
     const users = await sanityClient.fetch(
       `*[_type == "adminUser"${roleFilter}] | order(createdAt desc){
-        _id, employeeId, name, email, role, active, mustChangePassword, lastLogin, lastActivityAt, createdAt
+        _id, employeeId, name, email, role, active, mustChangePassword, lastLogin, lastActivityAt, createdAt,
+        department, internalTitle, phone,
+        "profileImageUrl": profileImage.asset->url
       }`,
       {}
     );

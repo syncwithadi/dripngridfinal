@@ -9,7 +9,7 @@ const INPUT = { padding: '8px 12px', fontSize: 13, border: '1px solid var(--as-i
 
 function CouponsContent() {
   const { user } = useAdmin();
-  const [tab, setTab] = useState<'list' | 'request'>('list');
+  const [tab, setTab] = useState<string>('list');
   const [coupons, setCoupons] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,17 @@ function CouponsContent() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
-  const isEmployee = user?.role === 'employee';
+  const isSuperAdmin = user?.role === 'super_admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+
+  // Define tabs based on role
+  const availableTabs = ['list'];
+  if (isSuperAdmin) {
+    availableTabs.push('create', 'pending');
+  } else {
+    availableTabs.push('request');
+  }
+
 
   // Request form state
   const [form, setForm] = useState({
@@ -72,6 +82,7 @@ function CouponsContent() {
       setSuccess('Request submitted! OTP sent to Super Admin for approval.');
       setForm({ code: '', type: 'percent', value: '', maxDiscount: '', minOrder: '', maxUses: '', maxUsesPerUser: '1', expiresAt: '', description: '', isPublic: true, reason: '' });
       fetchData();
+      setTimeout(() => setSuccess(''), 4000);
     } catch {
       setError('Submission failed. Try again.');
     } finally {
@@ -79,11 +90,53 @@ function CouponsContent() {
     }
   }
 
+  async function handleInstantCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.code || !form.value) { setError('Code and value are required.'); return; }
+    setSubmitting(true); setError(''); setSuccess('');
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Failed to create.'); return; }
+      setSuccess('Coupon instantly created and active!');
+      setForm({ code: '', type: 'percent', value: '', maxDiscount: '', minOrder: '', maxUses: '', maxUsesPerUser: '1', expiresAt: '', description: '', isPublic: true, reason: '' });
+      fetchData();
+      setTimeout(() => { setSuccess(''); setTab('list'); }, 1500);
+    } catch {
+      setError('Failed to create coupon.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function toggleActive(id: string, currentActive: boolean) {
+    try {
+      await fetch(`/api/admin/coupons/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !currentActive })
+      });
+      fetchData();
+    } catch (err) { console.error(err); }
+  }
+
+  async function deleteCoupon(id: string) {
+    if (!confirm('Are you sure you want to permanently delete this coupon?')) return;
+    try {
+      await fetch(`/api/admin/coupons/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (err) { console.error(err); }
+  }
+
   return (
     <>
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 24, border: '1px solid var(--as-border)', borderRadius: 8, overflow: 'hidden', width: 'fit-content' }}>
-        {(['list', 'request'] as const).map(t => (
+        {availableTabs.map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -95,7 +148,10 @@ function CouponsContent() {
               transition: 'all 0.12s',
             }}
           >
-            {t === 'list' ? 'Active Coupons' : isEmployee ? 'Request Coupon' : 'Pending Requests'}
+            {t === 'list' && 'Active Coupons'}
+            {t === 'request' && 'Request Coupon'}
+            {t === 'create' && 'Create Coupon'}
+            {t === 'pending' && 'Pending Requests'}
           </button>
         ))}
       </div>
@@ -105,7 +161,7 @@ function CouponsContent() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr>
-                {['Code', 'Type', 'Value', 'Min Order', 'Uses', 'Expires', 'Status'].map(h => (
+                {['Code', 'Type', 'Value', 'Min Order', 'Uses', 'Expires', 'Status', ...(isAdmin ? ['Actions'] : [])].map(h => (
                   <th key={h} style={{ textAlign: 'left', padding: '10px 14px', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--as-table-header)', borderBottom: '1px solid var(--as-border)' }}>
                     {h}
                   </th>
@@ -137,23 +193,37 @@ function CouponsContent() {
                       {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString('en-IN') : '∞'}
                     </td>
                     <td style={{ padding: '10px 14px' }}><StatusBadge status={statusVal} /></td>
+                    {isAdmin && (
+                      <td style={{ padding: '10px 14px' }}>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => toggleActive(c._id, c.active)} style={{ padding: '4px 8px', fontSize: 11, cursor: 'pointer', border: 'none', borderRadius: 4, background: c.active ? 'var(--as-badge-yellow)' : 'var(--as-badge-green)', color: c.active ? 'var(--as-badge-yellow-text)' : 'var(--as-badge-green-text)', fontWeight: 600 }}>
+                            {c.active ? 'Disable' : 'Enable'}
+                          </button>
+                          <button onClick={() => deleteCoupon(c._id)} style={{ padding: '4px 8px', fontSize: 11, cursor: 'pointer', border: 'none', borderRadius: 4, background: 'var(--as-badge-red)', color: 'var(--as-badge-red-text)', fontWeight: 600 }}>
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-      ) : isEmployee ? (
-        /* Employee coupon request form */
+      ) : tab === 'request' || tab === 'create' ? (
+        /* Coupon form */
         <div style={{ maxWidth: 560 }}>
           <div style={{ background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 10, padding: 28, boxShadow: 'var(--as-shadow)' }}>
-            <h3 style={{ margin: '0 0 20px', fontSize: 14, fontWeight: 600, color: 'var(--as-text)' }}>
-              Request New Coupon
+            <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: 'var(--as-text)' }}>
+              {tab === 'create' ? 'Instant Create Coupon' : 'Request New Coupon'}
             </h3>
             <p style={{ margin: '0 0 20px', fontSize: 13, color: 'var(--as-muted)' }}>
-              Coupon requests require Super Admin approval via OTP before being activated.
+              {tab === 'create' 
+                ? 'Super Admins can create and activate coupons instantly.' 
+                : 'Coupon requests require Super Admin approval via OTP before being activated.'}
             </p>
-            <form onSubmit={handleRequest}>
+            <form onSubmit={tab === 'create' ? handleInstantCreate : handleRequest}>
               <Row label="Coupon Code">
                 <input style={INPUT} value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))} placeholder="e.g. SUMMER20" required />
               </Row>
@@ -189,12 +259,12 @@ function CouponsContent() {
               {error && <div style={{ fontSize: 12, color: 'var(--as-badge-red-text)', padding: '8px 12px', background: 'var(--as-badge-red)', borderRadius: 6, marginBottom: 14 }}>{error}</div>}
               {success && <div style={{ fontSize: 12, color: 'var(--as-badge-green-text)', padding: '8px 12px', background: 'var(--as-badge-green)', borderRadius: 6, marginBottom: 14 }}>{success}</div>}
               <button type="submit" disabled={submitting} style={{ width: '100%', padding: '11px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: 'var(--as-bg)', border: 'none', borderRadius: 6, opacity: submitting ? 0.6 : 1 }}>
-                {submitting ? 'Submitting...' : 'Submit Request'}
+                {submitting ? 'Submitting...' : tab === 'create' ? 'Create Coupon Now' : 'Submit Request'}
               </button>
             </form>
           </div>
         </div>
-      ) : (
+      ) : tab === 'pending' ? (
         /* Admin view of pending requests */
         <div style={{ background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 10, overflow: 'hidden', boxShadow: 'var(--as-shadow)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -224,7 +294,7 @@ function CouponsContent() {
             </tbody>
           </table>
         </div>
-      )}
+      ) : null}
     </>
   );
 }

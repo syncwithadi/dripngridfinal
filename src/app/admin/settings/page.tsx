@@ -189,6 +189,9 @@ function DataVisibilityCard() {
 
 function ProfileForm({ user }: { user: any }) {
   const [name, setName] = useState(user?.name || '');
+  const [department, setDepartment] = useState(user?.department || '');
+  const [internalTitle, setInternalTitle] = useState(user?.internalTitle || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: 'success'|'error', text: string } | null>(null);
@@ -203,6 +206,9 @@ function ProfileForm({ user }: { user: any }) {
   useEffect(() => {
     if (user?.name) setName(user.name);
     if (user?.profileImage) setPreview(user.profileImage);
+    if (user?.department) setDepartment(user.department);
+    if (user?.internalTitle) setInternalTitle(user.internalTitle);
+    if (user?.phone) setPhone(user.phone);
   }, [user]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -210,7 +216,7 @@ function ProfileForm({ user }: { user: any }) {
       const f = e.target.files[0];
       setCropFileName(f.name);
       setCropImageRaw(URL.createObjectURL(f));
-      e.target.value = ''; // reset so same file can trigger change
+      e.target.value = '';
     }
   }
 
@@ -238,6 +244,9 @@ function ProfileForm({ user }: { user: any }) {
     try {
       const formData = new FormData();
       formData.append('name', name);
+      if (department) formData.append('department', department);
+      if (internalTitle) formData.append('internalTitle', internalTitle);
+      if (phone) formData.append('phone', phone);
       if (file) formData.append('file', file);
 
       const res = await fetch('/api/admin/auth/me', {
@@ -246,8 +255,8 @@ function ProfileForm({ user }: { user: any }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update profile');
-      setMsg({ type: 'success', text: 'Profile updated. Please refresh the page to see changes everywhere.' });
-      setTimeout(() => window.location.reload(), 1500);
+      setMsg({ type: 'success', text: 'Profile updated successfully.' });
+      setTimeout(() => window.location.reload(), 1400);
     } catch (err: any) {
       setMsg({ type: 'error', text: err.message });
     } finally {
@@ -260,6 +269,7 @@ function ProfileForm({ user }: { user: any }) {
   return (
     <Card title="My Profile">
       <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Avatar */}
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           <div style={{ position: 'relative', width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: 'var(--as-hover)', border: '1px solid var(--as-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             {preview ? (
@@ -271,19 +281,58 @@ function ProfileForm({ user }: { user: any }) {
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--as-text)', marginBottom: 4 }}>Profile Picture</div>
-            <div style={{ fontSize: 11, color: 'var(--as-muted)' }}>Click the image to upload a new 1:1 picture.</div>
+            <div style={{ fontSize: 11, color: 'var(--as-muted)' }}>Click the avatar to upload a new 1:1 photo. You&apos;ll get a crop tool.</div>
           </div>
         </div>
 
+        {/* Basic info */}
         <Field label="Full Name">
           <input type="text" value={name} onChange={e => setName(e.target.value)} required style={INPUT} />
         </Field>
 
+        {/* New staff fields */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <Field label="Department">
+            <input value={department} onChange={e => setDepartment(e.target.value)} placeholder="e.g. Operations" style={INPUT} />
+          </Field>
+          <Field label="Internal Title">
+            <input value={internalTitle} onChange={e => setInternalTitle(e.target.value)} placeholder="e.g. Logistics Lead" style={INPUT} />
+          </Field>
+        </div>
+        <Field label="Phone">
+          <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 XXXXXXXXXX" style={INPUT} />
+        </Field>
+
+        {/* Read-only info */}
         <div style={{ padding: '12px 14px', background: 'var(--as-hover)', borderRadius: 8, fontSize: 13 }}>
           <InfoRow label="Employee ID" value={user?.employeeId || '—'} />
           <InfoRow label="Email" value={user?.email || '—'} />
           <InfoRow label="Role" value={user?.role?.replace('_', ' ') || '—'} />
         </div>
+
+        {/* Session intelligence */}
+        {(user?.lastLogin || user?.lastLoginIP) && (
+          <div style={{
+            padding: '10px 14px', background: 'var(--as-hover)', borderRadius: 8,
+            fontSize: 12, border: '1px solid var(--as-border)',
+            display: 'flex', alignItems: 'flex-start', gap: 10,
+          }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>🔒</span>
+            <div>
+              <div style={{ fontWeight: 600, color: 'var(--as-text)', marginBottom: 3 }}>Last Session</div>
+              {user.lastLogin && (
+                <div style={{ color: 'var(--as-muted)' }}>
+                  Logged in {new Date(user.lastLogin).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </div>
+              )}
+              {user.lastLoginIP && (
+                <div style={{ color: 'var(--as-muted)', marginTop: 2 }}>
+                  From IP: <strong style={{ color: 'var(--as-text)', fontFamily: 'monospace' }}>{user.lastLoginIP}</strong>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {msg && (
           <div style={{
@@ -329,12 +378,8 @@ function ProfileForm({ user }: { user: any }) {
               />
             </div>
             <div style={{ padding: '16px 20px', display: 'flex', gap: 12, borderTop: '1px solid var(--as-border)' }}>
-              <button onClick={() => setCropImageRaw(null)} type="button" style={{ flex: 1, padding: '9px', fontSize: 13, cursor: 'pointer', border: '1px solid var(--as-border)', borderRadius: 6, background: 'transparent', color: 'var(--as-text)' }}>
-                Cancel
-              </button>
-              <button onClick={handleCropConfirm} type="button" style={{ flex: 1, padding: '9px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: 'var(--as-bg)', border: 'none', borderRadius: 6 }}>
-                Apply Crop
-              </button>
+              <button onClick={() => setCropImageRaw(null)} type="button" style={{ flex: 1, padding: '9px', fontSize: 13, cursor: 'pointer', border: '1px solid var(--as-border)', borderRadius: 6, background: 'transparent', color: 'var(--as-text)' }}>Cancel</button>
+              <button onClick={handleCropConfirm} type="button" style={{ flex: 1, padding: '9px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: 'var(--as-bg)', border: 'none', borderRadius: 6 }}>Apply Crop</button>
             </div>
           </div>
         </>

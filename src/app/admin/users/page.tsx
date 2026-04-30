@@ -197,11 +197,13 @@ function ResetPasswordModal({ targetUser, onClose, onSuccess }: { targetUser: an
   );
 }
 
-// ─── Edit User Modal ──────────────────────────────────────────────────────────
 function EditUserModal({ targetUser, onClose, onSuccess }: { targetUser: any; onClose: () => void; onSuccess: () => void }) {
-  const [name, setName] = useState(targetUser.name);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [name, setName]               = useState(targetUser.name || '');
+  const [department, setDepartment]   = useState(targetUser.department || '');
+  const [internalTitle, setInternal]  = useState(targetUser.internalTitle || '');
+  const [phone, setPhone]             = useState(targetUser.phone || '');
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -211,15 +213,22 @@ function EditUserModal({ targetUser, onClose, onSuccess }: { targetUser: any; on
       const res = await fetch(`/api/admin/users/${targetUser._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({
+          name: name.trim(),
+          department: department.trim(),
+          internalTitle: internalTitle.trim(),
+          phone: phone.trim(),
+        }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Failed to update name.'); return; }
+      if (!res.ok) { setError(data.error || 'Failed to update.'); return; }
       onSuccess();
     } finally {
       setLoading(false);
     }
   }
+
+  const inp: React.CSSProperties = { ...INPUT, marginBottom: 0 };
 
   return (
     <>
@@ -227,36 +236,158 @@ function EditUserModal({ targetUser, onClose, onSuccess }: { targetUser: any; on
       <div style={{
         position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
         background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 12,
-        padding: 28, width: 360, maxWidth: '92vw', zIndex: 301, boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+        padding: 28, width: 480, maxWidth: '94vw', zIndex: 301, boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
       }}>
-        <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--as-text)', marginBottom: 6 }}>Edit User Profile</div>
-        <div style={{ fontSize: 13, color: 'var(--as-muted)', marginBottom: 20 }}>
-          Update the profile details for <strong>{targetUser.employeeId}</strong>.
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--as-text)' }}>Edit Staff Profile</div>
+            <div style={{ fontSize: 12, color: 'var(--as-muted)', marginTop: 3 }}>{targetUser.employeeId} · {targetUser.role?.replace('_',' ')}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--as-muted)', fontSize: 18, lineHeight: 1 }}>✕</button>
         </div>
-        <form onSubmit={handleSubmit}>
-          <Field label="Full Name">
-            <input
-              style={INPUT}
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Full Name"
-              autoFocus
-              required
-            />
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Field label="Full Name *">
+            <input style={inp} type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" autoFocus required />
           </Field>
-          {error && (
-            <div style={{ fontSize: 12, color: 'var(--as-badge-red-text)', padding: '8px 10px', background: 'var(--as-badge-red)', borderRadius: 6, marginTop: 10 }}>{error}</div>
-          )}
-          <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '9px', fontSize: 13, cursor: 'pointer', border: '1px solid var(--as-border)', borderRadius: 6, background: 'transparent', color: 'var(--as-text)' }}>
-              Cancel
-            </button>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label="Department">
+              <input style={inp} value={department} onChange={e => setDepartment(e.target.value)} placeholder="e.g. Operations" />
+            </Field>
+            <Field label="Internal Title">
+              <input style={inp} value={internalTitle} onChange={e => setInternal(e.target.value)} placeholder="e.g. Logistics Lead" />
+            </Field>
+          </div>
+
+          <Field label="Phone">
+            <input style={inp} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 XXXXXXXXXX" />
+          </Field>
+
+          {error && <div style={{ fontSize: 12, color: 'var(--as-badge-red-text)', padding: '8px 10px', background: 'var(--as-badge-red)', borderRadius: 6 }}>{error}</div>}
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '9px', fontSize: 13, cursor: 'pointer', border: '1px solid var(--as-border)', borderRadius: 6, background: 'transparent', color: 'var(--as-text)' }}>Cancel</button>
             <button type="submit" disabled={loading} style={{ flex: 1, padding: '9px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: 'var(--as-bg)', border: 'none', borderRadius: 6 }}>
               {loading ? 'Saving…' : 'Save Changes'}
             </button>
           </div>
         </form>
+      </div>
+    </>
+  );
+}
+
+// ─── User Analysis Drawer ─────────────────────────────────────────────────────
+function UserAnalysisDrawer({ targetUser, onClose }: { targetUser: any; onClose: () => void }) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/admin/users/${targetUser._id}/analysis`)
+      .then(r => r.json())
+      .then(d => setData(d))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [targetUser._id]);
+
+  return (
+    <>
+      <div onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 400 }} />
+      <div style={{
+        position: 'fixed', top: 0, right: 0, bottom: 0, width: 640, maxWidth: '95vw',
+        background: 'var(--as-card)', borderLeft: '1px solid var(--as-border)',
+        zIndex: 401, display: 'flex', flexDirection: 'column', boxShadow: '-8px 0 32px rgba(0,0,0,0.25)',
+      }} onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div style={{ padding: '24px', borderBottom: '1px solid var(--as-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+              background: 'linear-gradient(135deg, var(--as-accent), #38bdf8)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18, fontWeight: 700, color: '#fff'
+            }}>
+              {(targetUser.name || '?').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()}
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--as-text)', marginBottom: 2 }}>{targetUser.name}</div>
+              <div style={{ fontSize: 13, color: 'var(--as-muted)' }}>
+                {targetUser.employeeId} · <span style={{ textTransform: 'capitalize' }}>{targetUser.role?.replace('_', ' ')}</span>
+                {targetUser.department && ` · ${targetUser.department}`}
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--as-muted)', lineHeight: 1 }}>✕</button>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', background: 'var(--as-bg)' }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 60, color: 'var(--as-muted)' }}>Loading analysis…</div>
+          ) : !data || data.error ? (
+            <div style={{ textAlign: 'center', padding: 60, color: 'var(--as-badge-red-text)', background: 'var(--as-badge-red)', borderRadius: 12 }}>
+              {data?.error || 'Failed to load analysis'}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {/* Stats Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                <div style={{ background: 'var(--as-card)', padding: 18, borderRadius: 12, border: '1px solid var(--as-border)' }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--as-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Time Logged</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--as-text)', marginBottom: 4 }}>
+                    {data.stats.hoursWorked} <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--as-muted)' }}>hrs active</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--as-muted)' }}>Across {data.stats.sessionsCount} recent sessions</div>
+                </div>
+
+                <div style={{ background: 'var(--as-card)', padding: 18, borderRadius: 12, border: '1px solid var(--as-border)' }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--as-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Task Completion</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--as-text)', marginBottom: 4 }}>
+                    {data.stats.tasksCompleted} <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--as-muted)' }}>done</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--as-muted)' }}>{data.stats.tasksPending} tasks pending</div>
+                </div>
+              </div>
+
+              {/* Recent Changes Log */}
+              <div>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--as-text)', marginBottom: 12, marginTop: 8 }}>Recent Action Log</h3>
+                <div style={{ background: 'var(--as-card)', borderRadius: 12, border: '1px solid var(--as-border)', overflow: 'hidden' }}>
+                  {data.recentWork?.length === 0 ? (
+                    <div style={{ padding: 24, textAlign: 'center', color: 'var(--as-muted)', fontSize: 13 }}>No recent working actions logged.</div>
+                  ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                      <tbody>
+                        {data.recentWork?.map((log: any) => (
+                          <tr key={log._id} style={{ borderBottom: '1px solid var(--as-border)' }}>
+                            <td style={{ padding: '12px 16px', verticalAlign: 'top', width: '35%' }}>
+                              <div style={{ fontSize: 11, color: 'var(--as-muted)', marginBottom: 4 }}>
+                                {new Date(log.timestamp).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                              <span style={{
+                                display: 'inline-flex', padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 600,
+                                background: ACTION_COLORS[log.action] || 'var(--as-badge-gray)',
+                                color: ACTION_TEXT[log.action] || 'var(--as-badge-gray-text)',
+                              }}>
+                                {log.action}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 16px', color: 'var(--as-text)' }}>
+                              <div style={{ fontWeight: 500 }}>{log.details || 'Performed action'}</div>
+                              {log.entity && <div style={{ fontSize: 11, color: 'var(--as-muted)', marginTop: 2 }}>Entity: {log.entity}</div>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
@@ -277,6 +408,7 @@ function UsersContent() {
   const [activityUser, setActivityUser] = useState<any>(null);
   const [resetUser, setResetUser] = useState<any>(null);
   const [editUser, setEditUser] = useState<any>(null);
+  const [analysisUser, setAnalysisUser] = useState<any>(null);
   const [logoutingId, setLogoutingId] = useState<string | null>(null);
 
   const isSuperAdmin = user?.role === 'super_admin';
@@ -352,6 +484,11 @@ function UsersContent() {
 
   return (
     <>
+      {/* Analysis Drawer */}
+      {analysisUser && (
+        <UserAnalysisDrawer targetUser={analysisUser} onClose={() => setAnalysisUser(null)} />
+      )}
+
       {/* Activity Drawer */}
       {activityUser && (
         <ActivityDrawer targetUser={activityUser} onClose={() => setActivityUser(null)} />
@@ -466,11 +603,50 @@ function UsersContent() {
             {loading ? (
               <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>Loading...</td></tr>
             ) : users.map(u => (
-              <tr key={u._id} style={{ borderBottom: '1px solid var(--as-border)' }}>
+              <tr 
+                key={u._id} 
+                onClick={() => setAnalysisUser(u)}
+                style={{ borderBottom: '1px solid var(--as-border)', cursor: 'pointer', transition: 'background 0.1s' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--as-hover)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+              >
                 {/* Employee */}
                 <td style={{ padding: '10px 14px' }}>
-                  <div style={{ fontWeight: 500, color: 'var(--as-text)' }}>{u.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--as-muted)' }}>{u.employeeId}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {/* Avatar — photo if uploaded, initials otherwise */}
+                    {u.profileImageUrl ? (
+                      <img
+                        src={u.profileImageUrl}
+                        alt={u.name}
+                        style={{
+                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                          objectFit: 'cover', border: '1px solid var(--as-border)',
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                        background: u.role === 'super_admin'
+                          ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
+                          : u.role === 'admin'
+                          ? 'linear-gradient(135deg,#0ea5e9,#38bdf8)'
+                          : 'linear-gradient(135deg,#10b981,#34d399)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 700, color: '#fff',
+                        letterSpacing: '0.03em', userSelect: 'none',
+                      }}>
+                        {(u.name || '?').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontWeight: 500, color: 'var(--as-text)', fontSize: 13 }}>{u.name}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--as-muted)', marginTop: 1 }}>
+                        {u.employeeId}
+                        {u.department && <span style={{ marginLeft: 5, opacity: 0.7 }}>· {u.department}</span>}
+                        {u.internalTitle && <span style={{ marginLeft: 5, opacity: 0.7 }}>· {u.internalTitle}</span>}
+                      </div>
+                    </div>
+                  </div>
                 </td>
 
                 {/* Email */}

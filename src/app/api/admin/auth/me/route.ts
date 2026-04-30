@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
   try {
     const user = await sanityClient.fetch(
       `*[_type == "adminUser" && _id == $id && active == true][0]{
-        sessionVersion, active, mustChangePassword, name, "profileImage": profileImage.asset->url
+        sessionVersion, active, mustChangePassword, name,
+        "profileImage": profileImage.asset->url,
+        department, internalTitle, phone,
+        lastLogin, lastLoginIP
       }`,
       { id: session.sub }
     );
@@ -34,6 +37,11 @@ export async function GET(req: NextRequest) {
       email: session.email,
       mustChangePassword: user.mustChangePassword || false,
       profileImage: user.profileImage || null,
+      department: user.department || null,
+      internalTitle: user.internalTitle || null,
+      phone: user.phone || null,
+      lastLogin: user.lastLogin || null,
+      lastLoginIP: user.lastLoginIP || null,
     });
   } catch (err) {
     console.error('[Admin Me]', err);
@@ -56,9 +64,15 @@ export async function PATCH(req: NextRequest) {
     const file = formData.get('file') as File | null;
 
     const patch: any = {};
-    if (name && name.trim().length > 0) {
-      patch.name = name.trim();
-    }
+    if (name && name.trim().length > 0) patch.name = name.trim();
+
+    // New staff fields
+    const department = formData.get('department') as string | null;
+    const internalTitle = formData.get('internalTitle') as string | null;
+    const phone = formData.get('phone') as string | null;
+    if (department !== null) patch.department = department.trim();
+    if (internalTitle !== null) patch.internalTitle = internalTitle.trim();
+    if (phone !== null) patch.phone = phone.trim();
 
     if (file && file.size > 0) {
       const arrayBuffer = await file.arrayBuffer();

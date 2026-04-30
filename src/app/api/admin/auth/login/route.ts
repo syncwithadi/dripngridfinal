@@ -4,7 +4,60 @@ import { sanityClient, sanityWriteClient } from '@/sanity/client';
 import { signAdminToken, adminCookieOptions } from '@/lib/admin/auth';
 import { logAction } from '@/lib/admin/logger';
 
+// ── IP-based rate limiting ────────────────────────────────────────────────────
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+
+interface RateLimitEntry { attempts: number; lockedUntil: number | null; }
+const rateLimitMap = new Map<string, RateLimitEntry>();
+
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown'
+  );
+}
+
+function checkRateLimit(ip: string): { blocked: boolean; remainingMs?: number } {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry) return { blocked: false };
+  if (entry.lockedUntil && now < entry.lockedUntil) {
+    return { blocked: true, remainingMs: entry.lockedUntil - now };
+  }
+  // Lockout expired — reset
+  if (entry.lockedUntil && now >= entry.lockedUntil) {
+    rateLimitMap.delete(ip);
+  }
+  return { blocked: false };
+}
+
+function recordFailedAttempt(ip: string): void {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip) || { attempts: 0, lockedUntil: null };
+  entry.attempts += 1;
+  if (entry.attempts >= MAX_ATTEMPTS) {
+    entry.lockedUntil = now + LOCKOUT_MS;
+  }
+  rateLimitMap.set(ip, entry);
+}
+
+function clearRateLimit(ip: string): void {
+  rateLimitMap.delete(ip);
+}
+
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { blocked, remainingMs } = checkRateLimit(ip);
+  if (blocked) {
+    const minutes = Math.ceil((remainingMs || LOCKOUT_MS) / 60000);
+    return NextResponse.json(
+      { error: `Too many failed attempts. Try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.` },
+      { status: 429 }
+    );
+  }
+
   try {
     const { employeeId, password } = await req.json();
 
@@ -21,6 +74,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (!user) {
+      recordFailedAttempt(ip);
       return NextResponse.json({ error: 'Invalid credentials.' }, { status: 401 });
     }
 
@@ -30,8 +84,12 @@ export async function POST(req: NextRequest) {
 
     const passwordValid = await bcrypt.compare(password, user.passwordHash);
     if (!passwordValid) {
+      recordFailedAttempt(ip);
       return NextResponse.json({ error: 'Invalid credentials.' }, { status: 401 });
     }
+
+    // Successful auth — clear rate limit for this IP
+    clearRateLimit(ip);
 
     // Use existing sessionVersion or default to 1
     const sv = user.sessionVersion ?? 1;
@@ -47,10 +105,10 @@ export async function POST(req: NextRequest) {
 
     const loginTime = new Date().toISOString();
 
-    // Update last login + clear idle flag
+    // Update last login + clear idle flag + store IP
     await sanityWriteClient
       .patch(user._id)
-      .set({ lastLogin: loginTime, lastActivityAt: loginTime, isCurrentlyIdle: false })
+      .set({ lastLogin: loginTime, lastActivityAt: loginTime, isCurrentlyIdle: false, lastLoginIP: ip })
       .commit();
 
     // Create a new adminSession document for activity tracking

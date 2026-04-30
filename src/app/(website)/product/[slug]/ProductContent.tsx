@@ -15,6 +15,8 @@ import SizeChartModal from '@/components/product/SizeChartModal';
 interface ProductContentProps {
     product: any;
     relatedProducts?: any[];
+    isPreviewMode?: boolean;
+    previewToken?: string;
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -24,7 +26,7 @@ const COLOR_MAP: Record<string, string> = {
     'washed black': '#2a2a2a', 'light blue': '#87ceeb', indigo: '#4b0082',
 };
 
-export default function ProductContent({ product, relatedProducts = [] }: ProductContentProps) {
+export default function ProductContent({ product, relatedProducts = [], isPreviewMode = false, previewToken }: ProductContentProps) {
     const { formatPrice } = useCurrency();
     const { toggleItem, isInWishlist } = useWishlistStore();
     const { addItem } = useCartStore();
@@ -52,10 +54,33 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
         return () => clearTimeout(t);
     }, []);
 
+    useEffect(() => {
+        if (isPreviewMode && previewToken) {
+            fetch('/api/admin/products/preview-log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: previewToken, action: 'Opened Product Preview Page' })
+            }).catch(console.error);
+        }
+    }, [isPreviewMode, previewToken]);
+
     const isWishlisted = mounted ? isInWishlist(product._id) : false;
     const isSoldOut = !product.inStock || product.badge === 'sold-out';
 
+    const logPreviewAction = (action: string) => {
+        if (!isPreviewMode || !previewToken) return;
+        fetch('/api/admin/products/preview-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: previewToken, action })
+        }).catch(console.error);
+    };
+
     const handleAddToCart = () => {
+        if (isPreviewMode) {
+            logPreviewAction('Clicked Add to Cart (Blocked)');
+            return;
+        }
         if (isSoldOut) return;
         setIsAdding(true);
         for (let i = 0; i < quantity; i++) {
@@ -74,6 +99,10 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
     };
 
     const handleBuyNow = () => {
+        if (isPreviewMode) {
+            logPreviewAction('Clicked Buy Now (Blocked)');
+            return;
+        }
         if (isSoldOut) return;
         const params = new URLSearchParams({
             buyNow: 'true',
@@ -130,6 +159,7 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
     }, [lightboxOpen, goNext, goPrev]);
 
     const openLightbox = (url: string) => {
+        logPreviewAction('Opened Image Lightbox');
         const idx = allImages.indexOf(url);
         setLightboxIndex(idx >= 0 ? idx : 0);
         setZoomed(false);
@@ -239,7 +269,7 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                                     <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-gray-700">
                                         Size: <span className="text-black">{selectedSize}</span>
                                     </p>
-                                    <button onClick={() => setIsSizeChartOpen(true)} className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-black transition-colors">
+                                    <button onClick={() => { logPreviewAction('Opened Size Chart'); setIsSizeChartOpen(true); }} className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-black transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
                                         </svg>
@@ -267,11 +297,11 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                                 <span className="px-3 text-xs font-semibold text-black min-w-[2rem] text-center">{quantity}</span>
                                 <button onClick={() => setQuantity(q => q + 1)} className="px-3 py-3 text-gray-500 hover:text-black hover:bg-gray-50 transition-colors text-sm leading-none">+</button>
                             </div>
-                            <button onClick={handleAddToCart} disabled={isSoldOut || isAdding}
+                            <button onClick={handleAddToCart} disabled={isSoldOut || isAdding || isPreviewMode}
                                 className="flex-1 py-3 text-[11px] font-bold tracking-[0.22em] uppercase rounded-md border border-gray-300 transition-all duration-200 group
                                     bg-white text-black hover:bg-black hover:text-white hover:border-black
                                     disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]">
-                                {isAdding ? 'Adding…' : isSoldOut ? 'Sold Out' : 'Add to Cart'}
+                                {isPreviewMode ? 'Preview (Purchases Disabled)' : isAdding ? 'Adding…' : isSoldOut ? 'Sold Out' : 'Add to Cart'}
                             </button>
                             <button onClick={handleWishlist} suppressHydrationWarning
                                 className="w-[46px] flex-shrink-0 flex items-center justify-center border border-gray-300 rounded-md bg-white transition-all duration-200 hover:border-black"
@@ -284,9 +314,9 @@ export default function ProductContent({ product, relatedProducts = [] }: Produc
                         </div>
 
                         {/* Buy It Now */}
-                        <button onClick={handleBuyNow} disabled={isSoldOut}
+                        <button onClick={handleBuyNow} disabled={isSoldOut || isPreviewMode}
                             className="w-full mb-5 py-3.5 bg-black text-white text-[11px] font-bold tracking-[0.22em] uppercase rounded-md hover:bg-[#1a1a1a] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200">
-                            {isSoldOut ? 'Sold Out' : 'Buy It Now'}
+                            {isPreviewMode ? 'Preview (Purchases Disabled)' : isSoldOut ? 'Sold Out' : 'Buy It Now'}
                         </button>
 
                         {/* Delivery checker */}
