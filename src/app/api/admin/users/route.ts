@@ -5,17 +5,14 @@ import { logAction } from '@/lib/admin/logger';
 import { sendAdminAccessEmail } from '@/lib/email';
 import bcrypt from 'bcryptjs';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const session = await getAdminSessionFromRequest(req);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    // Role restriction: super_admin sees all, admins/employees see everyone except super_admin (or just everyone, but we'll stick to employees seeing other employees to be safe). Actually, the user says "members can see the other members and admins".
-    // So everyone sees everyone, but maybe not super_admin? We'll let everyone see admin and employee, but only super_admin sees super_admin.
-    const roleFilter =
-      session.role === 'super_admin'
-        ? ``
-        : ` && role != "super_admin"`;
+    const roleFilter = ``;
 
     const users = await sanityClient.fetch(
       `*[_type == "adminUser"${roleFilter}] | order(createdAt desc){
@@ -23,7 +20,8 @@ export async function GET(req: NextRequest) {
         department, internalTitle, phone,
         "profileImageUrl": profileImage.asset->url
       }`,
-      {}
+      {},
+      { cache: 'no-store' }
     );
     return NextResponse.json({ users: users || [] });
   } catch (err) {
