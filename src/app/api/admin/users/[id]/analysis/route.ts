@@ -39,7 +39,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     let totalActiveSecs = 0;
     let totalIdleSecs = 0;
-    let currentSession = null;
+    let currentSession: any = null;
     
     sessions.forEach((s: any) => {
       totalActiveSecs += (s.totalActiveSeconds || 0);
