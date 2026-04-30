@@ -54,9 +54,15 @@ export default async function PreviewPage({ params }: { params: Promise<{ token:
     return (
         <div className="relative">
             {/* Admin Banner overlay */}
-            <div className="bg-black text-white text-[10px] font-bold tracking-widest uppercase py-2 text-center flex items-center justify-center gap-2 z-50 relative">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Secure Preview Mode — Link expires at {new Date(tokenDoc.expiresAt).toLocaleTimeString()}
+            <div className="w-full bg-[#111] text-white text-xs sm:text-sm font-semibold tracking-wide py-3 px-4 text-center flex flex-col sm:flex-row items-center justify-center gap-2 z-50 border-b-2 border-red-500 shadow-md">
+                <div className="flex items-center gap-2 text-red-400">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <span>SECURE PREVIEW MODE</span>
+                </div>
+                <span className="hidden sm:inline opacity-50">|</span>
+                <span className="opacity-90 text-[11px] sm:text-sm">
+                    Link expires at {new Date(tokenDoc.expiresAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true })} (IST)
+                </span>
             </div>
             
             <ProductContent 
