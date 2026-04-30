@@ -135,19 +135,6 @@ function DashboardContent() {
 
   return (
     <>
-      {/* Visibility cutoff banner */}
-      {!isSuperAdmin && data.visibleFrom && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px',
-          background: 'var(--as-badge-blue)', borderRadius: 'var(--as-radius)', marginBottom: 24, fontSize: 13,
-        }}>
-          <span style={{ fontSize: 16 }}>🔒</span>
-          <span style={{ color: 'var(--as-badge-blue-text)' }}>
-            <strong>Filtered View:</strong> You are viewing data from{' '}
-            <strong>{new Date(data.visibleFrom).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong> onwards.
-          </span>
-        </div>
-      )}
 
       {/* Greeting */}
       <div style={{ marginBottom: 32 }}>

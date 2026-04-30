@@ -93,6 +93,14 @@ const NAV_GROUPS: NavGroupDef[] = [
       { href: '/admin/archive',  label: 'Archive',     iconKey: 'archive',  roles: ['super_admin'] },
     ],
   },
+  {
+    label: 'Account',
+    defaultOpen: true,
+    roles: ['employee'],
+    items: [
+      { href: '/admin/profile', label: 'My Profile', iconKey: 'users', roles: ['employee'] },
+    ],
+  },
 ];
 
 interface Props {
@@ -345,7 +353,7 @@ export default function AdminSidebar({
 
         {/* User profile footer */}
         <Link
-          href={`/admin/users/${employeeId}`}
+          href={role === 'employee' ? `/admin/profile` : `/admin/users/${employeeId}`}
           style={{
             padding: '10px 14px',
             borderTop: '1px solid var(--as-border)',

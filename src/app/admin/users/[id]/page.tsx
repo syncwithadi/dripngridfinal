@@ -55,6 +55,8 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
   const [error, setError] = useState('');
 
   const isSuperAdmin = me?.role === 'super_admin';
+  const isEmployee   = me?.role === 'employee';
+  const isSelf       = me?.employeeId === employeeId;
 
   useEffect(() => {
     // Fetch user from users list
@@ -85,7 +87,10 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
 
   if (loading) return <Spinner />;
   if (error) return <div style={{ color: 'var(--as-badge-red-text)', padding: 40 }}>{error}</div>;
-  if (!profile) return null;
+  // Employees can only view their own profile
+  if (!profile || (isEmployee && !isSelf)) return (
+    <div style={{ color: 'var(--as-muted)', padding: 40, fontSize: 13 }}>Profile not accessible.</div>
+  );
 
   // Compute aggregate stats from session history
   const totalActive = sessions.reduce((sum, s) => sum + (s.totalActiveSeconds || 0), 0);
@@ -103,13 +108,24 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
     admin: 'var(--as-badge-yellow-text)',
     employee: 'var(--as-badge-gray-text)',
   };
+  const ROLE_LABEL: Record<string, string> = {
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    employee: 'Member',
+  };
 
   return (
     <div style={{ maxWidth: 760 }}>
       {/* Back */}
-      <Link href="/admin/users" style={{ fontSize: 12, color: 'var(--as-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20 }}>
-        ← Back to Users
-      </Link>
+      {isEmployee ? (
+        <Link href="/admin" style={{ fontSize: 12, color: 'var(--as-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20 }}>
+          ← Back to Dashboard
+        </Link>
+      ) : (
+        <Link href="/admin/users" style={{ fontSize: 12, color: 'var(--as-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20 }}>
+          ← Back to Team
+        </Link>
+      )}
 
       {/* Header card */}
       <div style={{ background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 12, padding: 28, marginBottom: 20, boxShadow: 'var(--as-shadow)' }}>

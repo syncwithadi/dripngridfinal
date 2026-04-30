@@ -8,6 +8,25 @@ import bcrypt from 'bcryptjs';
 export async function GET(req: NextRequest) {
   const session = await getAdminSessionFromRequest(req);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // Employees can only fetch their own record — used by the profile page
+  if (session.role === 'employee') {
+    try {
+      const users = await sanityClient.fetch(
+        `*[_type == "adminUser" && employeeId == $id]{
+          _id, employeeId, name, email, role, active, mustChangePassword, lastLogin, lastActivityAt, createdAt,
+          department, internalTitle, phone,
+          "profileImageUrl": profileImage.asset->url
+        }`,
+        { id: session.employeeId }
+      );
+      return NextResponse.json({ users: users || [] });
+    } catch (err) {
+      console.error('[Admin Users GET - employee self]', err);
+      return NextResponse.json({ error: 'Failed to fetch profile.' }, { status: 500 });
+    }
+  }
+
   if (!canAccess(session.role, 'admin')) {
     return NextResponse.json({ error: 'Insufficient permissions.' }, { status: 403 });
   }
@@ -33,6 +52,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch users.' }, { status: 500 });
   }
 }
+
 
 export async function POST(req: NextRequest) {
   const session = await getAdminSessionFromRequest(req);
