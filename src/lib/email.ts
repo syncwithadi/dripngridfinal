@@ -218,62 +218,123 @@ function buildAccessEmailHtml({
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>DRIPNGRID - You're in</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+    body { background-color: #f6f6f6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+    .wrapper { background-color: #f6f6f6; padding: 48px 16px; }
+    .card { max-width: 560px; width: 100%; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; }
+    .divider { width: 32px; height: 1px; background-color: #e0e0e0; margin: 18px auto 0; }
+    .text-primary { color: #111111; }
+    .text-secondary { color: #666666; }
+    .cred-box { background-color: #fafafa; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden; }
+    .cred-header { padding: 10px 20px; background-color: #f0f0f0; border-bottom: 1px solid #eaeaea; }
+    .cred-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; color: #666666; text-transform: uppercase; }
+    .cred-title { font-size: 11px; font-weight: 600; color: #666666; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+    .cred-value { font-size: 18px; font-weight: 700; color: #111111; font-family: monospace; letter-spacing: 0.05em; }
+    .cred-divider { padding-top: 16px; border-top: 1px solid #eaeaea; }
+    .note-box { font-size: 12px; color: #666666; line-height: 1.6; background-color: #fcfcfc; border: 1px solid #f0f0f0; border-radius: 6px; padding: 12px 14px; margin: 0; }
+    .btn { display: inline-block; background-color: #111111; color: #ffffff !important; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 14px 36px; border-radius: 6px; }
+    
+    @media (prefers-color-scheme: dark) {
+      body, .wrapper { background-color: #0b0b0b !important; }
+      .card { background-color: #111111 !important; border-color: #222222 !important; }
+      .divider { background-color: #333333 !important; }
+      .text-primary { color: #ffffff !important; }
+      .text-secondary { color: #888888 !important; }
+      .cred-box { background-color: #0f0f0f !important; border-color: #2a2a2a !important; }
+      .cred-header { background-color: #161616 !important; border-bottom-color: #2a2a2a !important; }
+      .cred-label, .cred-title { color: #555555 !important; }
+      .cred-value { color: #ffffff !important; }
+      .cred-divider { border-top-color: #222222 !important; }
+      .note-box { color: #555555 !important; background-color: #141414 !important; border-color: #1f1f1f !important; }
+      .btn { background-color: #ffffff !important; color: #000000 !important; }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;background:#0b0b0b;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0b0b0b;padding:48px 16px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#111111;border:1px solid #222222;border-radius:12px;overflow:hidden;">
-        <tr><td style="padding:36px 40px 0;text-align:center;">
-          <div style="font-size:13px;font-weight:700;letter-spacing:0.2em;color:#ffffff;text-transform:uppercase;">DRIPNGRID</div>
-          <div style="width:32px;height:1px;background:#333;margin:18px auto 0;"></div>
-        </td></tr>
-        <tr><td style="padding:32px 40px 0;text-align:center;">
-          <h1 style="margin:0;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;line-height:1.2;">You're in.</h1>
-          <p style="margin:14px 0 0;font-size:14px;color:#888888;line-height:1.6;">
-            Hey ${name} — your access to the DRIPNGRID internal panel is ready.<br/>
-            Use the credentials below to sign in for the first time.
-          </p>
-        </td></tr>
-        <tr><td style="padding:32px 40px 0;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f0f;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden;">
-            <tr><td style="padding:10px 20px;background:#161616;border-bottom:1px solid #2a2a2a;">
-              <span style="font-size:10px;font-weight:600;letter-spacing:0.12em;color:#555555;text-transform:uppercase;">Your Credentials</span>
-            </td></tr>
-            <tr><td style="padding:20px;">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr><td style="padding:0 0 16px;">
-                  <div style="font-size:11px;font-weight:600;color:#555555;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">ID</div>
-                  <div style="font-size:18px;font-weight:700;color:#ffffff;font-family:monospace;letter-spacing:0.05em;">${userId}</div>
-                </td></tr>
-                <tr><td style="padding-top:16px;border-top:1px solid #222;">
-                  <div style="font-size:11px;font-weight:600;color:#555555;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Password</div>
-                  <div style="font-size:18px;font-weight:700;color:#ffffff;font-family:monospace;letter-spacing:0.05em;">${tempPassword}</div>
-                </td></tr>
-              </table>
-            </td></tr>
+<body>
+  <div class="wrapper">
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+      <tr>
+        <td align="center">
+          <table class="card" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding: 36px 40px 0; text-align: center;">
+                <div class="text-primary" style="font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;">DRIPNGRID</div>
+                <div class="divider"></div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 32px 40px 0; text-align: center;">
+                <h1 class="text-primary" style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2;">You're in.</h1>
+                <p class="text-secondary" style="margin: 14px 0 0; font-size: 14px; line-height: 1.6;">
+                  Hey ${name} — your access to the DRIPNGRID internal panel is ready.<br/>
+                  Use the credentials below to sign in for the first time.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 32px 40px 0;">
+                <table class="cred-box" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td class="cred-header">
+                      <span class="cred-label">Your Credentials</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 20px;">
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="padding: 0 0 16px;">
+                            <div class="cred-title">ID</div>
+                            <div class="cred-value">${userId}</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="cred-divider">
+                            <div class="cred-title">Password</div>
+                            <div class="cred-value">${tempPassword}</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px 40px 0;">
+                <p class="note-box">
+                  You will be asked to set a new password on first login. Keep these credentials confidential.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 28px 40px 0; text-align: center;">
+                <a href="${loginUrl}" class="btn">Sign In</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 36px 40px; text-align: center;">
+                <div class="divider" style="margin: 0 auto 24px;"></div>
+                <p class="text-secondary" style="margin: 0; font-size: 11px; line-height: 1.7;">
+                  That’s it.<br/>
+                  Jump in.<br/>
+                  <br/>
+                  — DRIPNGRID
+                </p>
+              </td>
+            </tr>
           </table>
-        </td></tr>
-        <tr><td style="padding:20px 40px 0;">
-          <p style="margin:0;font-size:12px;color:#555555;line-height:1.6;background:#141414;border:1px solid #1f1f1f;border-radius:6px;padding:12px 14px;">
-            You will be asked to set a new password on first login. Keep these credentials confidential.
-          </p>
-        </td></tr>
-        <tr><td style="padding:28px 40px 0;text-align:center;">
-          <a href="${loginUrl}" style="display:inline-block;background:#ffffff;color:#000000;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;padding:14px 36px;border-radius:6px;">
-            Sign In
-          </a>
-        </td></tr>
-        <tr><td style="padding:36px 40px;text-align:center;">
-          <div style="width:32px;height:1px;background:#222;margin:0 auto 24px;"></div>
-          <p style="margin:0;font-size:11px;color:#444444;line-height:1.7;">
-            Automated message from DRIPNGRID Internal Systems.<br/>
-            Do not share or forward.
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>`;
 }
