@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSessionFromRequest, canAccess } from '@/lib/admin/auth';
 import { sanityClient, sanityWriteClient } from '@/sanity/client';
 import { logAction } from '@/lib/admin/logger';
+import { sendAdminAccessEmail } from '@/lib/email';
 import bcrypt from 'bcryptjs';
 
 export async function GET(req: NextRequest) {
@@ -74,6 +75,34 @@ export async function POST(req: NextRequest) {
       entityId: doc._id,
       details: `Created ${role}: ${name} (${employeeId})`,
     });
+
+    // Send welcome email with credentials (fire-and-forget — never blocks the response)
+    sendAdminAccessEmail({
+      name,
+      userId: employeeId,
+      tempPassword,
+      email,
+    }).then(async (emailResult) => {
+      // Log email delivery event to adminMail
+      try {
+        await sanityWriteClient.create({
+          _type: 'adminMail',
+          subject: 'DRIPNGRID — Your Access Is Ready',
+          to: email,
+          toName: name,
+          from: 'noreply@dripngrid.in',
+          fromName: 'DRIPNGRID',
+          fromAlias: 'noreply',
+          body: `Access credentials sent to ${name} (${employeeId})`,
+          sentAt: new Date().toISOString(),
+          status: emailResult.success ? 'sent' : 'failed',
+          sentBy: session.employeeId,
+          sentByName: session.name,
+        });
+      } catch (logErr) {
+        console.error('[USER_CREATE] Failed to log access email:', logErr);
+      }
+    }).catch(() => {});
 
     return NextResponse.json({ ok: true, id: doc._id });
   } catch (err) {
