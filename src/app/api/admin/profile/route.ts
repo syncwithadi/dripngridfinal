@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     await sanityWriteClient.patch(session.sub).set(patch).commit();
-    await logAction(session.sub, session.employeeId, 'USER_UPDATE', `Updated own profile: ${details.join(', ')}`);
+    await logAction(session, { action: 'USER_UPDATE', details: `Updated own profile: ${details.join(', ')}` });
 
     return NextResponse.json({ success: true });
   } catch (err) {
