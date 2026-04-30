@@ -53,16 +53,37 @@ export default async function PreviewPage({ params }: { params: Promise<{ token:
 
     return (
         <div className="relative">
-            {/* Admin Banner overlay */}
-            <div className="w-full bg-[#111] text-white text-xs sm:text-sm font-semibold tracking-wide py-3 px-4 text-center flex flex-col sm:flex-row items-center justify-center gap-2 z-50 border-b-2 border-red-500 shadow-md">
-                <div className="flex items-center gap-2 text-red-400">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    <span>SECURE PREVIEW MODE</span>
+            {/* Premium Admin Banner */}
+            <div className="w-full relative z-50 overflow-hidden bg-[#0a0a0a] border-b border-white/10">
+                {/* Subtle gradient glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent pointer-events-none"></div>
+                
+                <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between relative">
+                    <div className="flex items-center gap-4">
+                        {/* Animated recording/live dot */}
+                        <div className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/90">
+                                Secure Preview
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <span className="hidden sm:inline-block w-px h-3 bg-white/10"></span>
+                        <div className="text-[10px] sm:text-xs font-medium text-white/50 tracking-wider">
+                            EXPIRES AT <span className="text-white/90 font-bold ml-1">{new Date(tokenDoc.expiresAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true })} IST</span>
+                        </div>
+                    </div>
                 </div>
-                <span className="hidden sm:inline opacity-50">|</span>
-                <span className="opacity-90 text-[11px] sm:text-sm">
-                    Link expires at {new Date(tokenDoc.expiresAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true })} (IST)
-                </span>
+                
+                {/* Thin loading/progress strip aesthetic */}
+                <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-green-500/50 to-transparent w-full"></div>
             </div>
             
             <ProductContent 
