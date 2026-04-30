@@ -86,12 +86,49 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
+export const dynamic = 'force-dynamic';
+
+import { getAdminSession } from '@/lib/admin/auth';
+import { getSiteSettings } from '@/lib/getSiteSettings';
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getSiteSettings();
+  const session = await getAdminSession();
+  const isAdmin = session?.role === 'admin' || session?.role === 'super_admin';
+  const isLive = settings?.isLive ?? true;
+
+  if (!isLive && !isAdmin) {
+    return (
+      <html lang="en">
+        <body>
+          <div style={{
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#0a0a0a',
+            color: '#fff',
+            fontFamily: 'Inter, sans-serif',
+            textAlign: 'center'
+          }}>
+            <div>
+              <h1 style={{ fontSize: '32px', marginBottom: '12px' }}>
+                DRIPNGRID
+              </h1>
+              <p style={{ opacity: 0.7 }}>
+                {settings?.closedMessage || 'DRIPNGRID is closed for now. We’ll be back soon.'}
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    );
+  }
+
   // Fetch site settings server-side so the logo is available on first render
   // This eliminates the FOUC where text shows before the logo image loads
   let siteSettings: { brandLogo?: string; logoWidth?: number; siteName?: string } = {};

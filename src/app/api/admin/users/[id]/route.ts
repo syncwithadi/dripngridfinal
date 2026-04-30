@@ -45,9 +45,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       details.push(`role=${body.role}`);
     }
 
-    // ── Update name / email ──────────────────────────────────────────────────
-    if (body.name)          { patch.name          = body.name;          details.push(`name=${body.name}`); }
-    if (body.email)         { patch.email         = body.email;         details.push(`email=${body.email}`); }
+    // ── Update profile fields ────────────────────────────────────────────────
+    if (body.name)             { patch.name          = body.name;          details.push(`name=${body.name}`); }
+    if (body.email)            { patch.email         = body.email;         details.push(`email=${body.email}`); }
     if (body.department    !== undefined) { patch.department    = body.department;    details.push(`dept=${body.department}`); }
     if (body.internalTitle !== undefined) { patch.internalTitle = body.internalTitle; details.push(`title=${body.internalTitle}`); }
     if (body.phone         !== undefined) { patch.phone         = body.phone;         details.push(`phone=${body.phone}`); }

@@ -5,7 +5,7 @@ export const adminUserSchema = {
   fields: [
     {
       name: 'employeeId',
-      title: 'Employee ID',
+      title: 'ID',
       type: 'string',
       validation: (Rule: any) => Rule.required(),
     },

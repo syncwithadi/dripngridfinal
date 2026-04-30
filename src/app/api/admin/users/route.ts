@@ -41,10 +41,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { employeeId, name, email, role, tempPassword } = await req.json();
+    const { employeeId, name, email, role, tempPassword, department, internalTitle, phone } = await req.json();
 
     if (!employeeId || !name || !email || !role || !tempPassword) {
-      return NextResponse.json({ error: 'All fields required.' }, { status: 400 });
+      return NextResponse.json({ error: 'All required fields must be filled.' }, { status: 400 });
     }
 
     const existing = await sanityClient.fetch(
@@ -52,13 +52,16 @@ export async function POST(req: NextRequest) {
       { empId: employeeId }
     );
     if (existing) {
-      return NextResponse.json({ error: 'Employee ID already exists.' }, { status: 409 });
+      return NextResponse.json({ error: 'ID already exists.' }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(tempPassword, 12);
     const doc = await sanityWriteClient.create({
       _type: 'adminUser',
       employeeId, name, email, role,
+      department: department || null,
+      internalTitle: internalTitle || null,
+      phone: phone || null,
       passwordHash,
       active: true,
       mustChangePassword: true,

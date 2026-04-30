@@ -4,18 +4,12 @@ import { sanityClient } from '@/sanity/client';
 
 /**
  * GET /api/admin/users/status
- *
  * Returns real-time presence status for admin users.
  *
- * Status logic (based on lastActivityAt on adminUser doc):
- *   online  → lastActivityAt within last 2 minutes AND not idle
+ * Status logic (based on lastActivityAt):
+ *   online  → lastActivityAt within last 2 minutes
  *   idle    → lastActivityAt exists but >5 minutes ago (or isCurrentlyIdle=true)
- *   offline → no lastActivityAt, or session expired (>8h old without logout)
- *
- * Role restrictions:
- *   super_admin → sees all users
- *   admin       → sees employees only
- *   employee    → 403 (no access)
+ *   offline → no lastActivityAt, or >8h without activity
  */
 export async function GET(req: NextRequest) {
   const session = await getAdminSessionFromRequest(req);
@@ -25,7 +19,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Role filter: admins can't see super_admin users
     const roleClause =
       session.role === 'super_admin'
         ? ``
@@ -39,16 +32,15 @@ export async function GET(req: NextRequest) {
     );
 
     const now = Date.now();
-    const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;   // 2 minutes
-    const IDLE_THRESHOLD_MS = 5 * 60 * 1000;      // 5 minutes
-    const SESSION_EXPIRY_MS = 8 * 60 * 60 * 1000; // 8 hours
+    const ONLINE_THRESHOLD_MS  = 2 * 60 * 1000;   // 2 minutes
+    const IDLE_THRESHOLD_MS    = 5 * 60 * 1000;   // 5 minutes
+    const SESSION_EXPIRY_MS    = 8 * 60 * 60 * 1000; // 8 hours
 
     const withStatus = (users || []).map((u: any) => {
       let status: 'online' | 'idle' | 'offline' = 'offline';
 
       if (u.lastActivityAt) {
         const age = now - new Date(u.lastActivityAt).getTime();
-
         if (age > SESSION_EXPIRY_MS) {
           status = 'offline';
         } else if (u.isCurrentlyIdle || age >= IDLE_THRESHOLD_MS) {
@@ -56,7 +48,6 @@ export async function GET(req: NextRequest) {
         } else if (age < ONLINE_THRESHOLD_MS) {
           status = 'online';
         } else {
-          // Between 2min and 5min — still consider online (recently active)
           status = 'online';
         }
       }
@@ -71,13 +62,14 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Sort: online first, then idle, then offline
     const order: Record<'online' | 'idle' | 'offline', number> = { online: 0, idle: 1, offline: 2 };
-    withStatus.sort((a: any, b: any) => order[a.status as 'online'|'idle'|'offline'] - order[b.status as 'online'|'idle'|'offline']);
+    withStatus.sort((a: any, b: any) =>
+      order[a.status as 'online' | 'idle' | 'offline'] - order[b.status as 'online' | 'idle' | 'offline']
+    );
 
     return NextResponse.json({ users: withStatus });
   } catch (err) {
-    console.error('[Admin Users Status]', err);
+    console.error('[Admin Users Status GET]', err);
     return NextResponse.json({ error: 'Failed to fetch status.' }, { status: 500 });
   }
 }

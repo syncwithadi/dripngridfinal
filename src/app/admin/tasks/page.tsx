@@ -47,30 +47,26 @@ function NewTaskModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
     }
   }
 
+  const INPUT: React.CSSProperties = { width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid var(--as-input-border)', borderRadius: 6, background: 'var(--as-input-bg)', color: 'var(--as-text)', boxSizing: 'border-box' };
+
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 300 }} />
       <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 12, padding: 28, width: 440, maxWidth: '92vw', zIndex: 301, boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
         <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--as-text)', marginBottom: 20 }}>Create Task</div>
-        {[
-          { label: 'Task Title *', key: 'title', placeholder: 'What needs to be done?' },
-        ].map(({ label, key, placeholder }) => (
-          <div key={key} style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
-            <input value={form[key as keyof typeof form]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder={placeholder}
-              style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid var(--as-input-border)', borderRadius: 6, background: 'var(--as-input-bg)', color: 'var(--as-text)', boxSizing: 'border-box' }} />
-          </div>
-        ))}
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Task Title *</label>
+          <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="What needs to be done?" style={INPUT} />
+        </div>
         <div style={{ marginBottom: 14 }}>
           <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Description</label>
           <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Optional details..."
-            style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid var(--as-input-border)', borderRadius: 6, background: 'var(--as-input-bg)', color: 'var(--as-text)', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            style={{ ...INPUT, resize: 'vertical', fontFamily: 'inherit' }} />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
           <div>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Priority</label>
-            <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}
-              style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid var(--as-input-border)', borderRadius: 6, background: 'var(--as-input-bg)', color: 'var(--as-text)', boxSizing: 'border-box' }}>
+            <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={INPUT}>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -78,14 +74,12 @@ function NewTaskModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Deadline</label>
-            <input type="datetime-local" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
-              style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid var(--as-input-border)', borderRadius: 6, background: 'var(--as-input-bg)', color: 'var(--as-text)', boxSizing: 'border-box' }} />
+            <input type="datetime-local" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} style={INPUT} />
           </div>
         </div>
         <div style={{ marginBottom: 18 }}>
           <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Assign To *</label>
-          <select value={form.assignedTo} onChange={onSelectUser}
-            style={{ width: '100%', padding: '9px 12px', fontSize: 13, border: '1px solid var(--as-input-border)', borderRadius: 6, background: 'var(--as-input-bg)', color: 'var(--as-text)', boxSizing: 'border-box' }}>
+          <select value={form.assignedTo} onChange={onSelectUser} style={INPUT}>
             <option value="">Select employee...</option>
             {users.map((u: any) => <option key={u.employeeId} value={u.employeeId}>{u.name} ({u.employeeId})</option>)}
           </select>
@@ -93,7 +87,7 @@ function NewTaskModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
         {error && <div style={{ fontSize: 12, color: 'var(--as-badge-red-text)', padding: '8px 10px', background: 'var(--as-badge-red)', borderRadius: 6, marginBottom: 14 }}>{error}</div>}
         <div style={{ display: 'flex', gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, padding: '9px', fontSize: 13, cursor: 'pointer', border: '1px solid var(--as-border)', borderRadius: 6, background: 'transparent', color: 'var(--as-text)' }}>Cancel</button>
-          <button onClick={submit} disabled={loading} style={{ flex: 1, padding: '9px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: 'var(--as-bg)', border: 'none', borderRadius: 6 }}>
+          <button onClick={submit} disabled={loading} style={{ flex: 1, padding: '9px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: '#fff', border: 'none', borderRadius: 6 }}>
             {loading ? 'Creating…' : 'Create Task'}
           </button>
         </div>
@@ -116,7 +110,6 @@ function TaskCard({ task, onStatusChange }: { task: any; onStatusChange: (id: st
       borderLeft: `3px solid ${pc.text}`,
       transition: 'box-shadow 0.15s',
     }}>
-      {/* Priority + deadline row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
         <span style={{
           padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 700,
@@ -129,10 +122,8 @@ function TaskCard({ task, onStatusChange }: { task: any; onStatusChange: (id: st
         )}
       </div>
 
-      {/* Title */}
       <div style={{ fontWeight: 600, color: 'var(--as-text)', fontSize: 13, marginBottom: 4, lineHeight: 1.3 }}>{task.title}</div>
 
-      {/* Description */}
       {task.description && (
         <div style={{ fontSize: 11.5, color: 'var(--as-muted)', marginBottom: 8, lineHeight: 1.5,
           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -140,7 +131,6 @@ function TaskCard({ task, onStatusChange }: { task: any; onStatusChange: (id: st
         </div>
       )}
 
-      {/* Footer row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{
@@ -203,9 +193,9 @@ function TasksContent() {
         <div>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--as-text)', margin: 0, letterSpacing: '-0.02em' }}>Tasks</h2>
           <p style={{ fontSize: 13, color: 'var(--as-muted)', margin: '4px 0 0' }}>
-            {tasks.length} task{tasks.length !== 1 ? 's' : ''} ·
-            {' '}{tasks.filter(t => t.status === 'done').length} done ·
-            {' '}{tasks.filter(t => t.priority === 'high' && t.status !== 'done').length} high priority
+            {tasks.length} task{tasks.length !== 1 ? 's' : ''} ·{' '}
+            {tasks.filter(t => t.status === 'done').length} done ·{' '}
+            {tasks.filter(t => t.priority === 'high' && t.status !== 'done').length} high priority
           </p>
         </div>
         {canCreate && (

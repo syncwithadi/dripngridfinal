@@ -30,7 +30,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/requests':         'Coupon Requests',
   '/admin/customers':        'Customers',
   '/admin/logs':             'Audit Logs',
-  '/admin/users':            'Staff',
+  '/admin/users':            'Team',
   '/admin/settings':         'Settings',
   '/admin/hidden':           'Hidden Data',
   '/admin/archive':          'Archive',

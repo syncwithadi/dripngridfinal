@@ -407,10 +407,10 @@ function LoginForm() {
             ) : (
               <>
                 <h1 className="form-title">Welcome back.</h1>
-                <p className="form-sub">Sign in with your Employee ID to access the admin panel.</p>
+                <p className="form-sub">Sign in with your ID to access the admin panel.</p>
                 <form onSubmit={handleLogin}>
                   <div className="field-group">
-                    <label className="field-label">Employee ID</label>
+                    <label className="field-label">ID</label>
                     <input
                       className="field-input"
                       type="text"

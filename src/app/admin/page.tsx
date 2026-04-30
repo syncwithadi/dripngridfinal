@@ -26,7 +26,6 @@ interface UserStatus {
   lastLogin: string | null;
 }
 
-// ── Who's Online Widget ──────────────────────────────────────────────────────
 function OnlineUsersWidget() {
   const [users, setUsers] = useState<UserStatus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,18 +43,17 @@ function OnlineUsersWidget() {
 
   useEffect(() => {
     fetchStatus();
-    // Refresh every 60 seconds
     const iv = setInterval(fetchStatus, 60_000);
     return () => clearInterval(iv);
   }, [fetchStatus]);
 
   const online = users.filter(u => u.status === 'online').length;
-  const idle = users.filter(u => u.status === 'idle').length;
+  const idle   = users.filter(u => u.status === 'idle').length;
   const offline = users.filter(u => u.status === 'offline').length;
 
   const STATUS_DOT: Record<string, string> = {
-    online: '#22c55e',
-    idle: '#f59e0b',
+    online:  '#22c55e',
+    idle:    '#f59e0b',
     offline: '#6b7280',
   };
 
@@ -76,12 +74,12 @@ function OnlineUsersWidget() {
           <div style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)', fontSize: 13 }}>No team members found.</div>
         ) : users.map(u => (
           <div key={u.employeeId} style={{ padding: '12px 20px', borderBottom: '1px solid var(--as-border-subtle)', display: 'flex', alignItems: 'center', gap: 14 }}>
-            {/* Status dot */}
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: STATUS_DOT[u.status], flexShrink: 0, boxShadow: u.status === 'online' ? `0 0 0 3px ${STATUS_DOT[u.status]}30` : undefined }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--as-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.name}</div>
               <div style={{ fontSize: 11, color: 'var(--as-muted)', marginTop: 2 }}>
-                {u.employeeId} <span style={{ opacity: 0.5, margin: '0 4px' }}>·</span> <span style={{ textTransform: 'capitalize' }}>{u.role.replace('_', ' ')}</span>
+                {u.employeeId} <span style={{ opacity: 0.5, margin: '0 4px' }}>·</span>
+                <span style={{ textTransform: 'capitalize' }}>{u.role.replace('_', ' ')}</span>
               </div>
             </div>
             <div style={{ fontSize: 11, color: 'var(--as-muted)', textAlign: 'right', flexShrink: 0 }}>
@@ -99,7 +97,6 @@ function OnlineUsersWidget() {
   );
 }
 
-// ── Main Dashboard ───────────────────────────────────────────────────────────
 function DashboardContent() {
   const { user } = useAdmin();
   const [data, setData] = useState<DashboardData | null>(null);
@@ -113,14 +110,14 @@ function DashboardContent() {
       })
       .then(d => {
         setData({
-          ordersToday: d.ordersToday ?? 0,
-          pendingOrders: d.pendingOrders ?? 0,
-          pendingRequests: d.pendingRequests ?? 0,
-          lowStockCount: d.lowStockCount ?? 0,
-          recentOrders: Array.isArray(d.recentOrders) ? d.recentOrders : [],
-          recentLogs: Array.isArray(d.recentLogs) ? d.recentLogs : [],
-          visibleFrom: d.visibleFrom ?? null,
-          role: d.role ?? user?.role ?? 'employee',
+          ordersToday:      d.ordersToday ?? 0,
+          pendingOrders:    d.pendingOrders ?? 0,
+          pendingRequests:  d.pendingRequests ?? 0,
+          lowStockCount:    d.lowStockCount ?? 0,
+          recentOrders:     Array.isArray(d.recentOrders) ? d.recentOrders : [],
+          recentLogs:       Array.isArray(d.recentLogs) ? d.recentLogs : [],
+          visibleFrom:      d.visibleFrom ?? null,
+          role:             d.role ?? user?.role ?? 'employee',
         });
         setLoading(false);
       })
@@ -128,13 +125,17 @@ function DashboardContent() {
   }, [user]);
 
   if (loading) return <Spinner />;
-  if (!data) return <div style={{ color: 'var(--as-muted)', fontSize: 13, padding: 40, textAlign: 'center' }}>Failed to load dashboard data.</div>;
+  if (!data) return (
+    <div style={{ color: 'var(--as-muted)', fontSize: 13, padding: 40, textAlign: 'center' }}>
+      Failed to load dashboard data.
+    </div>
+  );
 
   const isSuperAdmin = data.role === 'super_admin';
 
   return (
     <>
-      {/* Visibility cutoff banner (non-super_admin with an active cutoff) */}
+      {/* Visibility cutoff banner */}
       {!isSuperAdmin && data.visibleFrom && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px',
@@ -164,10 +165,10 @@ function DashboardContent() {
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 32 }}>
-        <StatsCard label="Orders Today" value={data.ordersToday} icon="orders" />
-        <StatsCard label="Pending Orders" value={data.pendingOrders} icon="pending" accent={data.pendingOrders > 0 ? 'var(--as-badge-yellow-text)' : undefined} />
-        <StatsCard label="Low Stock" value={data.lowStockCount} icon="stock" accent={data.lowStockCount > 0 ? 'var(--as-badge-red-text)' : undefined} />
-        <StatsCard label="Pending Requests" value={data.pendingRequests} icon="requests" accent={data.pendingRequests > 0 ? 'var(--as-badge-blue-text)' : undefined} />
+        <StatsCard label="Orders Today"      value={data.ordersToday}     icon="orders" />
+        <StatsCard label="Pending Orders"    value={data.pendingOrders}   icon="pending"   accent={data.pendingOrders > 0 ? 'var(--as-badge-yellow-text)' : undefined} />
+        <StatsCard label="Low Stock"         value={data.lowStockCount}   icon="stock"     accent={data.lowStockCount > 0 ? 'var(--as-badge-red-text)' : undefined} />
+        <StatsCard label="Pending Requests"  value={data.pendingRequests} icon="requests"  accent={data.pendingRequests > 0 ? 'var(--as-badge-blue-text)' : undefined} />
       </div>
 
       {/* Main grid */}
@@ -225,7 +226,7 @@ function DashboardContent() {
         </Card>
       </div>
 
-      {/* Team Status (available to admin+ roles) */}
+      {/* Team Status — admin+ only */}
       {(isSuperAdmin || data.role === 'admin') && <OnlineUsersWidget />}
     </>
   );

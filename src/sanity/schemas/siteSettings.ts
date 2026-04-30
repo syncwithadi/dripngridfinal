@@ -6,6 +6,20 @@ export const siteSettingsSchema = {
   type: 'document',
   fields: [
     {
+      name: 'isLive',
+      title: 'Site Live',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Turn off to enable maintenance mode (Closed Page)',
+    },
+    {
+      name: 'closedMessage',
+      title: 'Closed Message',
+      type: 'string',
+      initialValue: 'DRIPNGRID is closed for now. We’ll be back soon.',
+      hidden: ({ document }: any) => document?.isLive === true,
+    },
+    {
       name: 'siteName',
       title: 'Site Name',
       type: 'string',

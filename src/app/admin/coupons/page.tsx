@@ -5,7 +5,20 @@ import AdminShell from '@/components/admin/AdminShell';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { useAdmin } from '@/components/admin/AdminShell';
 
-const INPUT = { padding: '8px 12px', fontSize: 13, border: '1px solid var(--as-input-border)', borderRadius: 6, background: 'var(--as-input-bg)', color: 'var(--as-text)', width: '100%' } as React.CSSProperties;
+const INPUT = {
+  padding: '8px 12px', fontSize: 13,
+  border: '1px solid var(--as-input-border)', borderRadius: 6,
+  background: 'var(--as-input-bg)', color: 'var(--as-text)', width: '100%',
+} as React.CSSProperties;
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
+      {children}
+    </div>
+  );
+}
 
 function CouponsContent() {
   const { user } = useAdmin();
@@ -20,20 +33,13 @@ function CouponsContent() {
   const isSuperAdmin = user?.role === 'super_admin';
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
 
-  // Define tabs based on role
   const availableTabs = ['list'];
-  if (isSuperAdmin) {
-    availableTabs.push('create', 'pending');
-  } else {
-    availableTabs.push('request');
-  }
+  if (isSuperAdmin) availableTabs.push('create', 'pending');
+  else availableTabs.push('request');
 
-
-  // Request form state
   const [form, setForm] = useState({
     code: '', type: 'percent', value: '', maxDiscount: '', minOrder: '',
-    maxUses: '', maxUsesPerUser: '1', expiresAt: '', description: '', isPublic: true,
-    reason: '',
+    maxUses: '', maxUsesPerUser: '1', expiresAt: '', description: '', isPublic: true, reason: '',
   });
 
   const fetchData = useCallback(async () => {
@@ -55,8 +61,7 @@ function CouponsContent() {
   async function handleRequest(e: React.FormEvent) {
     e.preventDefault();
     if (!form.code || !form.value) { setError('Code and value are required.'); return; }
-    setSubmitting(true);
-    setError('');
+    setSubmitting(true); setError('');
     try {
       const res = await fetch('/api/admin/coupons/request', {
         method: 'POST',
@@ -118,7 +123,7 @@ function CouponsContent() {
       await fetch(`/api/admin/coupons/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ active: !currentActive })
+        body: JSON.stringify({ active: !currentActive }),
       });
       fetchData();
     } catch (err) { console.error(err); }
@@ -148,9 +153,9 @@ function CouponsContent() {
               transition: 'all 0.12s',
             }}
           >
-            {t === 'list' && 'Active Coupons'}
+            {t === 'list'    && 'Active Coupons'}
             {t === 'request' && 'Request Coupon'}
-            {t === 'create' && 'Create Coupon'}
+            {t === 'create'  && 'Create Coupon'}
             {t === 'pending' && 'Pending Requests'}
           </button>
         ))}
@@ -170,13 +175,13 @@ function CouponsContent() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>Loading...</td></tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>Loading...</td></tr>
               ) : coupons.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>No coupons yet.</td></tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>No coupons yet.</td></tr>
               ) : coupons.map(c => {
                 const expired = c.expiresAt && new Date(c.expiresAt) < new Date();
                 const exhausted = c.maxUses && c.usedCount >= c.maxUses;
-                const statusVal = !c.active ? 'inactive' : expired || exhausted ? 'inactive' : 'active';
+                const statusVal = !c.active ? 'inactive' : (expired || exhausted) ? 'inactive' : 'active';
                 return (
                   <tr key={c._id} style={{ borderBottom: '1px solid var(--as-border)' }}>
                     <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--as-text)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>{c.code}</td>
@@ -186,9 +191,7 @@ function CouponsContent() {
                       {c.maxDiscount ? <span style={{ color: 'var(--as-muted)', fontSize: 11 }}> (max ₹{c.maxDiscount})</span> : ''}
                     </td>
                     <td style={{ padding: '10px 14px', color: 'var(--as-muted)' }}>{c.minOrder ? `₹${c.minOrder}` : '—'}</td>
-                    <td style={{ padding: '10px 14px', color: 'var(--as-muted)' }}>
-                      {c.usedCount || 0}{c.maxUses ? `/${c.maxUses}` : ''}
-                    </td>
+                    <td style={{ padding: '10px 14px', color: 'var(--as-muted)' }}>{c.usedCount || 0}{c.maxUses ? `/${c.maxUses}` : ''}</td>
                     <td style={{ padding: '10px 14px', color: expired ? 'var(--as-badge-red-text)' : 'var(--as-muted)', fontSize: 12 }}>
                       {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString('en-IN') : '∞'}
                     </td>
@@ -211,16 +214,16 @@ function CouponsContent() {
             </tbody>
           </table>
         </div>
+
       ) : tab === 'request' || tab === 'create' ? (
-        /* Coupon form */
         <div style={{ maxWidth: 560 }}>
           <div style={{ background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 10, padding: 28, boxShadow: 'var(--as-shadow)' }}>
             <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: 'var(--as-text)' }}>
               {tab === 'create' ? 'Instant Create Coupon' : 'Request New Coupon'}
             </h3>
             <p style={{ margin: '0 0 20px', fontSize: 13, color: 'var(--as-muted)' }}>
-              {tab === 'create' 
-                ? 'Super Admins can create and activate coupons instantly.' 
+              {tab === 'create'
+                ? 'Super Admins can create and activate coupons instantly.'
                 : 'Coupon requests require Super Admin approval via OTP before being activated.'}
             </p>
             <form onSubmit={tab === 'create' ? handleInstantCreate : handleRequest}>
@@ -253,24 +256,26 @@ function CouponsContent() {
               <Row label="Description">
                 <input style={INPUT} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Customer-facing description" />
               </Row>
-              <Row label="Reason for Request">
-                <textarea style={{ ...INPUT, resize: 'vertical' } as React.CSSProperties} value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={2} placeholder="Why is this coupon needed?" />
-              </Row>
+              {tab === 'request' && (
+                <Row label="Reason for Request">
+                  <textarea style={{ ...INPUT, resize: 'vertical' } as React.CSSProperties} value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={2} placeholder="Why is this coupon needed?" />
+                </Row>
+              )}
               {error && <div style={{ fontSize: 12, color: 'var(--as-badge-red-text)', padding: '8px 12px', background: 'var(--as-badge-red)', borderRadius: 6, marginBottom: 14 }}>{error}</div>}
               {success && <div style={{ fontSize: 12, color: 'var(--as-badge-green-text)', padding: '8px 12px', background: 'var(--as-badge-green)', borderRadius: 6, marginBottom: 14 }}>{success}</div>}
-              <button type="submit" disabled={submitting} style={{ width: '100%', padding: '11px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: 'var(--as-bg)', border: 'none', borderRadius: 6, opacity: submitting ? 0.6 : 1 }}>
-                {submitting ? 'Submitting...' : tab === 'create' ? 'Create Coupon Now' : 'Submit Request'}
+              <button type="submit" disabled={submitting} style={{ padding: '9px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: 'var(--as-accent)', color: 'var(--as-bg)', border: 'none', borderRadius: 6, opacity: submitting ? 0.6 : 1 }}>
+                {submitting ? 'Submitting...' : tab === 'create' ? 'Create Coupon' : 'Submit Request'}
               </button>
             </form>
           </div>
         </div>
+
       ) : tab === 'pending' ? (
-        /* Admin view of pending requests */
         <div style={{ background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 10, overflow: 'hidden', boxShadow: 'var(--as-shadow)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr>
-                {['Code', 'Value', 'Requested By', 'Date', 'Status', 'Reason'].map(h => (
+                {['Code', 'Requested By', 'Type', 'Value', 'Reason', 'Status', 'Date'].map(h => (
                   <th key={h} style={{ textAlign: 'left', padding: '10px 14px', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--as-table-header)', borderBottom: '1px solid var(--as-border)' }}>
                     {h}
                   </th>
@@ -278,33 +283,30 @@ function CouponsContent() {
               </tr>
             </thead>
             <tbody>
-              {requests.map(r => (
+              {loading ? (
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>Loading...</td></tr>
+              ) : requests.length === 0 ? (
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>No pending requests.</td></tr>
+              ) : requests.map(r => (
                 <tr key={r._id} style={{ borderBottom: '1px solid var(--as-border)' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 700, fontFamily: 'monospace', color: 'var(--as-text)' }}>{r.couponData?.code}</td>
+                  <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--as-text)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>{r.couponData?.code || '—'}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--as-muted)' }}>{r.requestedByName || r.requestedBy}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--as-muted)', textTransform: 'capitalize' }}>{r.couponData?.type || '—'}</td>
                   <td style={{ padding: '10px 14px', color: 'var(--as-text)' }}>
-                    {r.couponData?.type === 'percent' ? `${r.couponData.value}%` : `₹${r.couponData?.value}`}
+                    {r.couponData?.type === 'percent' ? `${r.couponData.value}%` : r.couponData?.value ? `₹${r.couponData.value}` : '—'}
                   </td>
-                  <td style={{ padding: '10px 14px', color: 'var(--as-text)' }}>{r.requestedByName}</td>
-                  <td style={{ padding: '10px 14px', color: 'var(--as-muted)' }}>{new Date(r.createdAt).toLocaleDateString('en-IN')}</td>
-                  <td style={{ padding: '10px 14px' }}><StatusBadge status={r.status} /></td>
-                  <td style={{ padding: '10px 14px', color: 'var(--as-muted)', fontSize: 12, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.reason || '—'}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--as-muted)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.reason || '—'}</td>
+                  <td style={{ padding: '10px 14px' }}><StatusBadge status={r.status || 'pending'} /></td>
+                  <td style={{ padding: '10px 14px', color: 'var(--as-muted)', fontSize: 12 }}>
+                    {r.requestedAt ? new Date(r.requestedAt).toLocaleDateString('en-IN') : '—'}
+                  </td>
                 </tr>
               ))}
-              {requests.length === 0 && <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--as-muted)' }}>No requests found.</td></tr>}
             </tbody>
           </table>
         </div>
       ) : null}
     </>
-  );
-}
-
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
-      {children}
-    </div>
   );
 }
 

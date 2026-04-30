@@ -12,7 +12,8 @@ let _logoFetched = false;
 
 // ── Icon Component ─────────────────────────────────────────────────────────────
 const Icon = ({ d, size = 14 }: { d: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
     <path d={d} />
   </svg>
 );
@@ -57,7 +58,6 @@ const NAV_GROUPS: NavGroupDef[] = [
     items: [
       { href: '/admin',           label: 'Dashboard',       iconKey: 'dashboard' },
       { href: '/admin/orders',    label: 'Orders',          iconKey: 'orders' },
-      { href: '/admin/products',  label: 'Live Products',   iconKey: 'dashboard' },
       { href: '/admin/inventory', label: 'Inventory',       iconKey: 'inventory' },
       { href: '/admin/coupons',   label: 'Coupons',         iconKey: 'coupons' },
       { href: '/admin/requests',  label: 'Coupon Requests', iconKey: 'requests' },
@@ -87,7 +87,7 @@ const NAV_GROUPS: NavGroupDef[] = [
     defaultOpen: false,
     roles: ['super_admin', 'admin'],
     items: [
-      { href: '/admin/users',    label: 'Staff',       iconKey: 'users',    roles: ['super_admin', 'admin'] },
+      { href: '/admin/users',    label: 'Team',        iconKey: 'users',    roles: ['super_admin', 'admin'] },
       { href: '/admin/settings', label: 'Settings',    iconKey: 'settings', roles: ['super_admin'] },
       { href: '/admin/hidden',   label: 'Hidden Data', iconKey: 'hidden',   roles: ['super_admin'] },
       { href: '/admin/archive',  label: 'Archive',     iconKey: 'archive',  roles: ['super_admin'] },
@@ -104,7 +104,9 @@ interface Props {
   onClose?: () => void;
 }
 
-function NavGroupSection({ group, role, pathname }: { group: NavGroupDef; role: string; pathname: string }) {
+function NavGroupSection({ group, role, pathname }: {
+  group: NavGroupDef; role: string; pathname: string;
+}) {
   const visibleItems = group.items.filter(item => !item.roles || item.roles.includes(role));
   const hasActive = visibleItems.some(item =>
     pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
@@ -115,6 +117,7 @@ function NavGroupSection({ group, role, pathname }: { group: NavGroupDef; role: 
 
   return (
     <div style={{ marginBottom: 2 }}>
+      {/* Group label + toggle */}
       <button
         onClick={() => setOpen(v => !v)}
         style={{
@@ -126,18 +129,32 @@ function NavGroupSection({ group, role, pathname }: { group: NavGroupDef; role: 
         onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--as-text)'}
         onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--as-muted)'}
       >
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <span style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+        }}>
           {group.label}
         </span>
-        <span style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.18s ease', display: 'flex' }}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <span style={{
+          transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+          transition: 'transform 0.18s ease', display: 'flex',
+        }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 18l6-6-6-6" />
           </svg>
         </span>
       </button>
-      <div style={{ overflow: 'hidden', maxHeight: open ? `${visibleItems.length * 38}px` : '0', transition: 'max-height 0.22s cubic-bezier(0.4,0,0.2,1)' }}>
+
+      {/* Items */}
+      <div style={{
+        overflow: 'hidden',
+        maxHeight: open ? `${visibleItems.length * 38}px` : '0',
+        transition: 'max-height 0.22s cubic-bezier(0.4,0,0.2,1)',
+      }}>
         {visibleItems.map(item => {
-          const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+          const isActive =
+            pathname === item.href ||
+            (item.href !== '/admin' && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
@@ -167,7 +184,7 @@ function NavGroupSection({ group, role, pathname }: { group: NavGroupDef; role: 
               }}
             >
               <span style={{ opacity: isActive ? 1 : 0.6 }}>
-                <Icon d={ICONS[item.iconKey]} size={14} />
+                <Icon d={ICONS[item.iconKey] || ICONS.dashboard} size={14} />
               </span>
               {item.label}
             </Link>
@@ -178,22 +195,29 @@ function NavGroupSection({ group, role, pathname }: { group: NavGroupDef; role: 
   );
 }
 
-export default function AdminSidebar({ role, employeeName, employeeId, profileImage, isOpen = false, onClose }: Props) {
+export default function AdminSidebar({
+  role, employeeName, employeeId, profileImage, isOpen = false, onClose,
+}: Props) {
   const pathname = usePathname();
   const [brandLogo, setBrandLogo] = useState<string | null>(_cachedLogoUrl);
   const [loadingLogo, setLoadingLogo] = useState(!_logoFetched);
 
+  // Logo fetch with module-level cache
   useEffect(() => {
     if (_logoFetched) return;
-    sanityClient.fetch(siteSettingsQuery).then(data => {
-      _cachedLogoUrl = data?.brandLogo || null;
-      _logoFetched = true;
-      setBrandLogo(_cachedLogoUrl);
-    }).catch(console.error).finally(() => setLoadingLogo(false));
+    sanityClient.fetch(siteSettingsQuery)
+      .then(data => {
+        _cachedLogoUrl = data?.brandLogo || null;
+        _logoFetched = true;
+        setBrandLogo(_cachedLogoUrl);
+      })
+      .catch(console.error)
+      .finally(() => setLoadingLogo(false));
   }, []);
 
   // Close mobile drawer on route change
-  useEffect(() => { onClose?.(); }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { onClose?.(); }, [pathname]);
 
   const initials = employeeName
     ? employeeName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -203,7 +227,7 @@ export default function AdminSidebar({ role, employeeName, employeeId, profileIm
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Mobile overlay backdrop */}
       <div
         className="as-sidebar-overlay"
         onClick={onClose}
@@ -219,56 +243,101 @@ export default function AdminSidebar({ role, employeeName, employeeId, profileIm
         className={`as-sidebar${isOpen ? ' as-sidebar-open' : ''}`}
         style={{
           width: 232, minHeight: '100vh',
-          background: 'var(--as-sidebar)', borderRight: '1px solid var(--as-border)',
+          background: 'var(--as-sidebar)',
+          borderRight: '1px solid var(--as-border)',
           display: 'flex', flexDirection: 'column',
           position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 200,
         }}
       >
-        {/* Brand */}
-        <div style={{ height: 55, padding: '0 20px', borderBottom: '1px solid var(--as-border)', display: 'flex', alignItems: 'center' }}>
+        {/* Brand header */}
+        <div style={{
+          height: 55, padding: '0 20px',
+          borderBottom: '1px solid var(--as-border)',
+          display: 'flex', alignItems: 'center',
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {loadingLogo ? (
               <div style={{ width: 28, height: 28, flexShrink: 0 }} />
             ) : brandLogo ? (
-              <img src={brandLogo} alt="Logo" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0, transform: 'scale(2.2)' }} />
+              <img
+                src={brandLogo} alt="Logo"
+                style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0, transform: 'scale(2.2)' }}
+              />
             ) : (
-              <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--as-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: 7,
+                background: 'var(--as-accent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
             )}
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.06em', color: 'var(--as-text)', textTransform: 'uppercase', lineHeight: 1 }}>DRIPNGRID</div>
-              <div style={{ fontSize: 10, color: 'var(--as-muted)', marginTop: 3, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Admin Console</div>
+              <div style={{
+                fontSize: 13, fontWeight: 700, letterSpacing: '0.06em',
+                color: 'var(--as-text)', textTransform: 'uppercase', lineHeight: 1,
+              }}>
+                DRIPNGRID
+              </div>
+              <div style={{
+                fontSize: 10, color: 'var(--as-muted)', marginTop: 3,
+                letterSpacing: '0.05em', textTransform: 'uppercase',
+              }}>
+                Admin Console
+              </div>
             </div>
           </div>
         </div>
 
         {/* Search / Ctrl+K hint */}
         <button
-          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }))}
+          onClick={() => document.dispatchEvent(
+            new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true })
+          )}
           style={{
             margin: '10px 12px 4px', padding: '7px 10px',
             background: 'var(--as-hover)', border: '1px solid var(--as-border)',
-            borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+            borderRadius: 6, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 6,
             color: 'var(--as-muted)', fontSize: 11, transition: 'all 0.12s',
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--as-accent)'; (e.currentTarget as HTMLElement).style.color = 'var(--as-text)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--as-border)'; (e.currentTarget as HTMLElement).style.color = 'var(--as-muted)'; }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.borderColor = 'var(--as-accent)';
+            (e.currentTarget as HTMLElement).style.color = 'var(--as-text)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.borderColor = 'var(--as-border)';
+            (e.currentTarget as HTMLElement).style.color = 'var(--as-muted)';
+          }}
         >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
           </svg>
           <span style={{ flex: 1 }}>Search…</span>
-          <kbd style={{ fontSize: 9, padding: '1px 4px', border: '1px solid var(--as-border)', borderRadius: 3, background: 'var(--as-bg)', fontFamily: 'inherit' }}>⌘K</kbd>
+          <kbd style={{
+            fontSize: 9, padding: '1px 4px',
+            border: '1px solid var(--as-border)', borderRadius: 3,
+            background: 'var(--as-bg)', fontFamily: 'inherit',
+          }}>
+            Ctrl K
+          </kbd>
         </button>
 
         {/* Grouped navigation */}
         <nav style={{ flex: 1, padding: '6px 0 10px', overflowY: 'auto' }}>
           {visibleGroups.map((group, i) => (
             <div key={group.label} style={{ marginTop: i > 0 ? 4 : 0 }}>
-              {i > 0 && <div style={{ height: 1, background: 'var(--as-border)', margin: '8px 16px 10px' }} />}
+              {i > 0 && (
+                <div style={{
+                  height: 1, background: 'var(--as-border)',
+                  margin: '8px 16px 10px',
+                }} />
+              )}
               <NavGroupSection group={group} role={role} pathname={pathname} />
             </div>
           ))}
@@ -276,24 +345,55 @@ export default function AdminSidebar({ role, employeeName, employeeId, profileIm
 
         {/* User profile footer */}
         <Link
-          href="/admin/settings"
-          style={{ padding: '10px 14px', borderTop: '1px solid var(--as-border)', textDecoration: 'none', display: 'block', transition: 'background 0.12s' }}
+          href={`/admin/users/${employeeId}`}
+          style={{
+            padding: '10px 14px',
+            borderTop: '1px solid var(--as-border)',
+            textDecoration: 'none', display: 'block',
+            transition: 'background 0.12s',
+          }}
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--as-hover)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          title="View your profile"
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {profileImage ? (
-              <img src={profileImage} alt="Profile" style={{ width: 30, height: 30, borderRadius: 8, objectFit: 'cover', flexShrink: 0, border: '1px solid var(--as-border)' }} />
+              <img
+                src={profileImage} alt="Profile"
+                style={{
+                  width: 30, height: 30, borderRadius: 8,
+                  objectFit: 'cover', flexShrink: 0,
+                  border: '1px solid var(--as-border)',
+                }}
+              />
             ) : (
-              <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--as-accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: 8,
+                background: 'var(--as-accent)', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 700, flexShrink: 0,
+                letterSpacing: '0.02em',
+              }}>
                 {initials}
               </div>
             )}
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--as-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employeeName}</div>
-              <div style={{ fontSize: 10, color: 'var(--as-muted)', marginTop: 2, textTransform: 'capitalize' }}>{role.replace('_', ' ')} · {employeeId}</div>
+              <div style={{
+                fontSize: 12, fontWeight: 600, color: 'var(--as-text)',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {employeeName}
+              </div>
+              <div style={{
+                fontSize: 10, color: 'var(--as-muted)', marginTop: 2,
+                textTransform: 'capitalize',
+              }}>
+                {role.replace('_', ' ')} · {employeeId}
+              </div>
             </div>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ marginLeft: 'auto', opacity: 0.25, flexShrink: 0 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round"
+              style={{ marginLeft: 'auto', opacity: 0.25, flexShrink: 0 }}>
               <path d="M9 18l6-6-6-6" />
             </svg>
           </div>

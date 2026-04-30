@@ -233,7 +233,7 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
       <div style={{ background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 10, padding: 20, boxShadow: 'var(--as-shadow)' }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--as-text)', marginBottom: 14 }}>Account Details</div>
         {[
-          ['Employee ID', profile.employeeId],
+          ['ID', profile.employeeId],
           ['Email', profile.email],
           ['Member Since', fmtDate(profile.createdAt ?? null)],
           ['Last Activity', fmtDate(profile.lastActivityAt ?? null)],

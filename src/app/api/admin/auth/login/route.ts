@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     const { employeeId, password } = await req.json();
 
     if (!employeeId || !password) {
-      return NextResponse.json({ error: 'Employee ID and password are required.' }, { status: 400 });
+      return NextResponse.json({ error: 'ID and password are required.' }, { status: 400 });
     }
 
     const user = await sanityClient.fetch(

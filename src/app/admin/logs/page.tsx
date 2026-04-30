@@ -188,7 +188,7 @@ export default function LogsPage() {
                     <td colSpan={6} style={{ padding: '12px 14px', borderBottom: '1px solid var(--as-border)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, fontSize: 12 }}>
                         <ExpRow label="Full Timestamp" value={new Date(log.timestamp).toLocaleString('en-IN')} />
-                        <ExpRow label="Employee ID" value={log.employeeId} />
+                        <ExpRow label="ID" value={log.employeeId} />
                         <ExpRow label="Role" value={log.role} />
                         <ExpRow label="Entity ID" value={log.entityId || '—'} />
                         <ExpRow label="IP Address" value={log.ip || '—'} />
