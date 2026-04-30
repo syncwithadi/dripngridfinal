@@ -79,7 +79,7 @@ function OnlineUsersWidget() {
               <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--as-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.name}</div>
               <div style={{ fontSize: 11, color: 'var(--as-muted)', marginTop: 2 }}>
                 {u.employeeId} <span style={{ opacity: 0.5, margin: '0 4px' }}>·</span>
-                <span style={{ textTransform: 'capitalize' }}>{u.role.replace('_', ' ')}</span>
+                <span style={{ textTransform: 'capitalize' }}>{u.role === 'employee' ? 'Member' : u.role.replace('_', ' ')}</span>
               </div>
             </div>
             <div style={{ fontSize: 11, color: 'var(--as-muted)', textAlign: 'right', flexShrink: 0 }}>
@@ -157,7 +157,7 @@ function DashboardContent() {
         <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--as-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span>{user?.employeeId}</span>
           <span style={{ opacity: 0.5 }}>·</span>
-          <span style={{ textTransform: 'capitalize' }}>{user?.role?.replace('_', ' ')}</span>
+          <span style={{ textTransform: 'capitalize' }}>{user?.role === 'employee' ? 'Member' : user?.role?.replace('_', ' ')}</span>
           <span style={{ opacity: 0.5 }}>·</span>
           <span>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
         </p>

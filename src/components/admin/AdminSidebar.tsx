@@ -388,7 +388,7 @@ export default function AdminSidebar({
                 fontSize: 10, color: 'var(--as-muted)', marginTop: 2,
                 textTransform: 'capitalize',
               }}>
-                {role.replace('_', ' ')} · {employeeId}
+                {role === 'employee' ? 'Member' : role.replace('_', ' ')} · {employeeId}
               </div>
             </div>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"

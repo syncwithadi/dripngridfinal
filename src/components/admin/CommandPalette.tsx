@@ -110,7 +110,7 @@ export default function CommandPalette() {
             id: `user-${u._id}`,
             type: 'user',
             label: u.name,
-            sub: `${u.employeeId} · ${u.role?.replace('_', ' ')}`,
+            sub: `${u.employeeId} · ${u.role === 'employee' ? 'Member' : u.role?.replace('_', ' ')}`,
             href: `/admin/users`,
             icon: '👤',
           });
