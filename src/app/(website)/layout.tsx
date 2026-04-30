@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display, Outfit, Bodoni_Moda, Bebas_Neue } from 'next/font/google';
-import Script from "next/script";
+import Script from 'next/script';
 import '../globals.css';
 import Navbar from '@/components/Navbar';
 import PromoRibbon from '@/components/PromoRibbon';
@@ -13,10 +13,12 @@ import AuthProvider from '@/context/AuthProvider';
 import { sanityClient } from '@/sanity/client';
 import { siteSettingsQuery } from '@/sanity/queries';
 import TabTitleEffect from '@/components/TabTitleEffect';
+import { getAdminSession } from '@/lib/admin/auth';
+import { getSiteSettings } from '@/lib/getSiteSettings';
 
-// Re-fetch site settings (logo, name, etc.) every 60 seconds
-// so Sanity Studio changes appear on the live site quickly
-export const revalidate = 60;
+// Force every request to be dynamic so the isLive flag is checked on every page load,
+// not once at build time. This is what makes the site toggle work instantly.
+export const dynamic = 'force-dynamic';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -86,20 +88,23 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
-export const dynamic = 'force-dynamic';
-
-import { getAdminSession } from '@/lib/admin/auth';
-import { getSiteSettings } from '@/lib/getSiteSettings';
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSiteSettings();
-  const session = await getAdminSession();
-  const isAdmin = session?.role === 'admin' || session?.role === 'super_admin';
-  const isLive = settings?.isLive ?? true;
+  // ── Maintenance gate ───────────────────────────────────────────────────────
+  // Checked on every request (force-dynamic above). If the site is set to
+  // "Closed" in the admin panel AND the visitor is not an admin/super_admin,
+  // they see the maintenance page instead of the website.
+  const [siteToggle, session] = await Promise.all([
+    getSiteSettings(),
+    getAdminSession(),
+  ]);
+
+  const isLive    = siteToggle?.isLive ?? true;
+  const isAdmin   = session?.role === 'admin' || session?.role === 'super_admin';
 
   if (!isLive && !isAdmin) {
     return (
@@ -108,29 +113,29 @@ export default async function RootLayout({
           <div style={{
             height: '100vh',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             background: '#0a0a0a',
             color: '#fff',
-            fontFamily: 'Inter, sans-serif',
-            textAlign: 'center'
+            fontFamily: 'Inter, system-ui, sans-serif',
+            textAlign: 'center',
+            gap: 12,
           }}>
-            <div>
-              <h1 style={{ fontSize: '32px', marginBottom: '12px' }}>
-                DRIPNGRID
-              </h1>
-              <p style={{ opacity: 0.7 }}>
-                {settings?.closedMessage || 'DRIPNGRID is closed for now. We’ll be back soon.'}
-              </p>
-            </div>
+            <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>
+              DRIPNGRID
+            </h1>
+            <p style={{ opacity: 0.6, margin: 0, fontSize: 15, maxWidth: 380, lineHeight: 1.6 }}>
+              {siteToggle?.closedMessage || "DRIPNGRID is closed for now. We'll be back soon."}
+            </p>
           </div>
         </body>
       </html>
     );
   }
 
-  // Fetch site settings server-side so the logo is available on first render
-  // This eliminates the FOUC where text shows before the logo image loads
+  // ── Normal website layout ──────────────────────────────────────────────────
+  // Fetch brand settings (logo, site name) — falls back gracefully
   let siteSettings: { brandLogo?: string; logoWidth?: number; siteName?: string } = {};
   try {
     siteSettings = await sanityClient.fetch(siteSettingsQuery) ?? {};
