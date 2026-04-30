@@ -58,27 +58,26 @@ export default async function PreviewPage({ params }: { params: Promise<{ token:
                 {/* Subtle gradient glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent pointer-events-none"></div>
                 
-                <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between relative">
-                    <div className="flex items-center gap-4">
+                <div className="max-w-7xl mx-auto px-6 py-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 relative h-full">
+                    <div className="flex items-center gap-3">
                         {/* Animated recording/live dot */}
-                        <div className="relative flex h-2.5 w-2.5">
+                        <div className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/90">
+                        <div className="flex items-center gap-1.5">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-white/90 leading-none pt-[2px]">
                                 Secure Preview
                             </span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <span className="hidden sm:inline-block w-px h-3 bg-white/10"></span>
-                        <div className="text-[10px] sm:text-xs font-medium text-white/50 tracking-wider">
-                            EXPIRES AT <span className="text-white/90 font-bold ml-1">{new Date(tokenDoc.expiresAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true })} IST</span>
-                        </div>
+                    <span className="hidden sm:inline-block w-px h-3 bg-white/10"></span>
+                    
+                    <div className="text-[10px] sm:text-xs font-medium text-white/50 tracking-wider flex items-center leading-none pt-[2px]">
+                        EXPIRES AT <span className="text-white/90 font-bold ml-1.5">{new Date(tokenDoc.expiresAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true })} IST</span>
                     </div>
                 </div>
                 
