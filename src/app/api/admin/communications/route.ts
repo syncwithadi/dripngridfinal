@@ -13,8 +13,9 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
+    const filter = session.role === 'employee' ? ` && sentBy == "${session.employeeId}"` : ``;
     const mails = await sanityClient.fetch(
-      `*[_type == "adminMail"] | order(sentAt desc) [0...80] {
+      `*[_type == "adminMail"${filter}] | order(sentAt desc) [0...80] {
         _id, subject, to, toName, from, fromName, fromAlias, body, sentAt, status, sentByName
       }`,
       {}
@@ -29,10 +30,6 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getAdminSessionFromRequest(req);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  if (session.role !== 'admin' && session.role !== 'super_admin') {
-    return NextResponse.json({ error: 'Insufficient permissions.' }, { status: 403 });
-  }
 
   try {
     const { to, toName, subject, body, fromAlias } = await req.json();

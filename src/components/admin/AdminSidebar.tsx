@@ -159,9 +159,14 @@ function NavGroupSection({ group, role, pathname }: {
         transition: 'max-height 0.22s cubic-bezier(0.4,0,0.2,1)',
       }}>
         {visibleItems.map(item => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== '/admin' && pathname.startsWith(item.href));
+          let isActive = false;
+          if (item.href === '/admin/users') {
+            isActive = pathname === '/admin/users' || (role !== 'employee' && pathname.startsWith('/admin/users/'));
+          } else if (item.href === '/admin/profile') {
+            isActive = pathname === '/admin/profile' || pathname.startsWith('/admin/users/');
+          } else {
+            isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href + '/'));
+          }
           return (
             <Link
               key={item.href}

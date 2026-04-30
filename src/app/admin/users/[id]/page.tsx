@@ -57,6 +57,7 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
   const isSuperAdmin = me?.role === 'super_admin';
   const isEmployee   = me?.role === 'employee';
   const isSelf       = me?.employeeId === employeeId;
+  const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
     // Fetch user from users list
@@ -131,13 +132,20 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
       <div style={{ background: 'var(--as-card)', border: '1px solid var(--as-border)', borderRadius: 12, padding: 28, marginBottom: 20, boxShadow: 'var(--as-shadow)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
           {/* Avatar */}
-          <div style={{
-            width: 56, height: 56, borderRadius: '50%', background: 'var(--as-accent)',
-            color: 'var(--as-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, fontWeight: 700, flexShrink: 0, letterSpacing: '-0.02em',
-          }}>
-            {profile.name?.charAt(0)?.toUpperCase() || '?'}
-          </div>
+          {profile.profileImageUrl ? (
+            <img src={profile.profileImageUrl} alt="Avatar" style={{
+              width: 56, height: 56, borderRadius: '50%', objectFit: 'cover',
+              border: '2px solid var(--as-border)', flexShrink: 0,
+            }} />
+          ) : (
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%', background: 'var(--as-accent)',
+              color: 'var(--as-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 22, fontWeight: 700, flexShrink: 0, letterSpacing: '-0.02em',
+            }}>
+              {profile.name?.charAt(0)?.toUpperCase() || '?'}
+            </div>
+          )}
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--as-text)' }}>{profile.name}</h2>
@@ -164,6 +172,16 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
               <div style={{ fontSize: 12, marginTop: 6, color: 'var(--as-badge-yellow-text)' }}>⚠ Must change password on next login</div>
             )}
           </div>
+          {/* Edit button for self */}
+          {isSelf && (
+            <button onClick={() => setShowEdit(true)} style={{
+              background: 'var(--as-bg)', border: '1px solid var(--as-border)',
+              borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600,
+              color: 'var(--as-text)', cursor: 'pointer', transition: 'background 0.1s',
+            }}>
+              Edit Profile
+            </button>
+          )}
         </div>
       </div>
 
@@ -260,7 +278,124 @@ function ProfileContent({ employeeId }: { employeeId: string }) {
           </div>
         ))}
       </div>
+
+      {/* Edit Modal */}
+      {showEdit && (
+        <EditProfileModal
+          profile={profile}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => {
+            setShowEdit(false);
+            window.location.reload(); // Refresh to show new profile data
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function EditProfileModal({ profile, onClose, onSaved }: { profile: any, onClose: () => void, onSaved: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState({
+    name: profile.name || '',
+    department: profile.department || '',
+    internalTitle: profile.internalTitle || '',
+    phone: profile.phone || '',
+  });
+  const [imgData, setImgData] = useState<string | null>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const b64 = evt.target?.result as string;
+      setImgData(b64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const payload: any = { ...form };
+      if (imgData) {
+        // extract base64 string
+        payload.profileImageBase64 = imgData.split(',')[1];
+      }
+      const res = await fetch('/api/admin/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update');
+      onSaved();
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const INP = { width: '100%', padding: '10px 12px', fontSize: 13, border: '1px solid var(--as-border)', borderRadius: 6, background: 'var(--as-bg)', color: 'var(--as-text)', outline: 'none' };
+  const LBL = { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--as-muted)', marginBottom: 6, textTransform: 'uppercase' as any, letterSpacing: '0.04em' };
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
+      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', maxWidth: 440, background: 'var(--as-card)', borderRadius: 12, padding: 24, zIndex: 1000, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+        <h3 style={{ margin: '0 0 20px 0', fontSize: 18 }}>Edit Profile</h3>
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          
+          <div>
+            <label style={LBL}>Profile Picture</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              {imgData ? (
+                <img src={imgData} alt="Preview" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : profile.profileImageUrl ? (
+                <img src={profile.profileImageUrl} alt="Current" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--as-border)' }} />
+              )}
+              <input type="file" accept="image/*" onChange={handleFile} style={{ fontSize: 12 }} />
+            </div>
+          </div>
+
+          <div>
+            <label style={LBL}>Name</label>
+            <input style={INP} required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          </div>
+          <div>
+            <label style={LBL}>Department</label>
+            <input style={INP} value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} placeholder="e.g. Operations" />
+          </div>
+          <div>
+            <label style={LBL}>Title / Role Label</label>
+            <input style={INP} value={form.internalTitle} onChange={e => setForm(f => ({ ...f, internalTitle: e.target.value }))} placeholder="e.g. Inventory Manager" />
+          </div>
+          <div>
+            <label style={LBL}>Phone</label>
+            <input style={INP} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+91..." />
+          </div>
+
+          {error && <div style={{ color: 'var(--as-badge-red-text)', background: 'var(--as-badge-red)', padding: '8px 12px', borderRadius: 6, fontSize: 12 }}>{error}</div>}
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid var(--as-border)', borderRadius: 6, cursor: 'pointer', color: 'var(--as-text)' }}>Cancel</button>
+            <button type="submit" disabled={loading} style={{ flex: 1, padding: '10px', background: 'var(--as-accent)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
+              {loading ? 'Saving...' : 'Save Profile'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 }
 
