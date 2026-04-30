@@ -24,116 +24,16 @@ const CSS = `
 
 .login-root {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: #06060a;
-}
-
-/* ── Left panel (brand side) ─────────────────────────── */
-.login-brand {
-  position: relative;
-  background: #08080c;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 52px 56px;
-  overflow: hidden;
-  border-right: 1px solid rgba(255,255,255,0.04);
-}
-
-/* Subtle radial glow */
-.login-brand::before {
-  content: '';
-  position: absolute;
-  top: -100px;
-  left: -100px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%);
-  pointer-events: none;
-}
-
-.login-brand-logo {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  animation: slideIn 0.5s ease both;
-}
-.login-brand-name {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.42em;
-  color: rgba(255,255,255,0.45);
-  text-transform: uppercase;
-}
-.login-brand-sub {
-  font-size: 9px;
-  letter-spacing: 0.24em;
-  color: rgba(255,255,255,0.14);
-  text-transform: uppercase;
-}
-
-.login-brand-center {
-  animation: fadeUp 0.6s 0.1s ease both;
-}
-.login-brand-headline {
-  font-size: 42px;
-  font-weight: 800;
-  color: rgba(255,255,255,0.08);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-  user-select: none;
-}
-.login-brand-tagline {
-  margin-top: 20px;
-  font-size: 13px;
-  color: rgba(255,255,255,0.18);
-  line-height: 1.7;
-  letter-spacing: 0.01em;
-  max-width: 320px;
-}
-
-.login-brand-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  animation: fadeUp 0.6s 0.2s ease both;
-}
-.login-brand-version {
-  font-size: 10px;
-  color: rgba(255,255,255,0.1);
-  letter-spacing: 0.08em;
-}
-.login-brand-status {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  color: rgba(255,255,255,0.12);
-  letter-spacing: 0.04em;
-}
-.login-brand-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: #4ade80;
-  opacity: 0.6;
-  animation: pulse 2.5s ease infinite;
-}
-
-/* ── Right panel (form side) ──────────────────────────── */
-.login-form-panel {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 32px;
+  font-family: 'Inter', system-ui, sans-serif;
   background: #06060a;
   position: relative;
 }
 
 /* Dot grid texture */
-.login-form-panel::before {
+.login-root::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -142,6 +42,16 @@ const CSS = `
   pointer-events: none;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+}
+
+.login-form-panel {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 40px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .form-card {
@@ -351,33 +261,7 @@ function LoginForm() {
         <div className="corner corner-tl" />
         <div className="corner corner-br" />
 
-        {/* ── Left: Brand panel ── */}
-        <div className="login-brand">
-          <div className="login-brand-logo">
-            <div className="login-brand-name">DRIPNGRID</div>
-            <div className="login-brand-sub">Admin Console</div>
-          </div>
-
-          <div className="login-brand-center">
-            <div className="login-brand-headline">
-              DRIP<br/>NGRID<br/>ADMIN
-            </div>
-            <div className="login-brand-tagline">
-              Internal operations panel for the DRIPNGRID team.
-              Manage orders, products, staff, and more.
-            </div>
-          </div>
-
-          <div className="login-brand-footer">
-            <span className="login-brand-version">v2.0 · {new Date().getFullYear()}</span>
-            <span className="login-brand-status">
-              <span className="login-brand-dot" />
-              Systems operational
-            </span>
-          </div>
-        </div>
-
-        {/* ── Right: Form panel ── */}
+        {/* ── Form panel ── */}
         <div className="login-form-panel">
           <div className="form-card">
             <div className="form-eyebrow">Secure Login</div>
